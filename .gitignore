@@ -1,6 +1,8 @@
-# Dependencies
+# Node dependencies
 node_modules/
 */node_modules/
+backend/node_modules/
+frontend/node_modules/
 .pnp
 .pnp.js
 
@@ -10,24 +12,31 @@ dist/
 build/
 */build/
 
-# Environment files
+# Environment files with secrets
 .env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-*.env
-!*.env.example
+.env.*
+!.env.example
+backend/.env
+backend/.env.*
+!backend/.env.example
+
+# Uploaded media and documents
+uploads/
+backend/uploads/
+!backend/uploads/.gitkeep
 
 # Logs
+logs/
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
-*.log
 
-# Editor & OS files
+# OS & IDE
+.DS_Store
+Thumbs.db
 .vscode/
 .idea/
 *.suo
@@ -35,5 +44,3 @@ lerna-debug.log*
 *.njsproj
 *.sln
 *.sw?
-.DS_Store
-Thumbs.db

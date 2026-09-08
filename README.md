@@ -1,65 +1,111 @@
 # Saraswati Educational & Charitable Trust (SECT) Web Application
 
-A secure, scalable web platform for **Saraswati Educational & Charitable Trust (SECT)** — an Indian Public Charitable Trust empowering rural and underserved communities through education, renewable energy, sustainable livelihood, and environmental restoration.
+SECT is a web application and management system for the Saraswati Educational & Charitable Trust, supporting education, renewable energy, environmental protection, sustainable livelihoods, agriculture, solid-waste management, and community welfare.
 
-## 🚀 Repository Structure
+The Trust operates in education, renewable energy, environmental protection, energy conservation, sustainable livelihoods, agriculture, solid-waste management, and community welfare.
+
+---
+
+## Repository Structure
+
+As defined in `ANTIGRAVITY_TEAM_RULES.md`, the repository follows a multi-developer ownership model across 3 developers:
 
 ```text
 SECT/
-├── frontend/                     # React + Vite client-side application (Mrinmayee)
-│   ├── src/
-│   │   ├── api/                 # Centralized Axios client & services
-│   │   ├── components/          # Common primitives, cards, donation flow, layouts
-│   │   ├── context/             # AuthContext (JWT) & NotificationContext (toasts)
-│   │   ├── pages/               # Public, Auth, and Admin Management screens
-│   │   └── styles/              # Bespoke Philanthropic Design System (index.css)
-│   ├── .env.example
-│   └── package.json
-├── backend/                      # Node.js & Express REST API (Suchitra)
-├── database/                     # PostgreSQL migrations & schemas (Suchitra)
-├── ANTIGRAVITY_TEAM_RULES.md     # Team contracts and development rules
-├── mrinmayee-frontend-plan.md    # Frontend architecture and integration plan
-└── suchitra-backend-plan.md      # Backend architecture and API specification
+├── frontend/           # React + Vite client application
+├── backend/            # Node.js + Express REST API
+├── database/           # PostgreSQL migrations and seeds
+├── docs/               # API and database documentation
+├── tests/              # Backend tests
+├── ANTIGRAVITY_TEAM_RULES.md
+├── suchitra-backend-plan.md
+└── mrinmayee-frontend-plan.md
 ```
 
-## 💻 Frontend Setup (Mrinmayee's Module)
+## Frontend Setup
+
+Prerequisites: Node.js 18+ and npm 9+.
+
+```bash
+cd frontend
+npm install
+cp .env.example .env
+npm run dev
+```
+
+The Vite development server runs at `http://localhost:3000/` when configured by `vite.config.js`. Build with `npm run build`.
+
+## Backend Setup
+
+Prerequisites: Node.js 18+ and PostgreSQL 14+.
+
+```bash
+cd backend
+npm install
+cp .env.example .env
+```
+
+Update the database credentials and secret keys in `.env`, then run migrations and seeds:
+
+```bash
+npm run migrate:seed
+npm run dev
+```
+
+The API is available at `http://localhost:5000/api/v1`.
+
+## Team Ownership
+
+- **Suchitra:** Backend API, PostgreSQL database, JWT authentication, RBAC, payments, webhooks, and 80G receipts.
+- **Mrinmayee:** React frontend, public and admin UI, API integration, and donation flow.
+- **Developer 3:** QA, DevOps, CI/CD, and deployment.
+
+---
+
+## 2. Backend Getting Started
 
 ### Prerequisites
 - Node.js (v18+)
-- npm (v9+)
+- PostgreSQL (v14+)
 
-### Getting Started
+### Installation
+```bash
+cd backend
+npm install
+```
 
-1. Navigate to the frontend directory:
-   ```bash
-   cd frontend
-   ```
+### Environment Configuration
+Copy the example environment file:
+```bash
+cp .env.example .env
+```
+Update your database credentials and secret keys in `.env`.
 
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
+### Database Migrations
+Run the database migrations and seed scripts:
+```bash
+npm run migrate:seed
+```
 
-3. Configure environment variables:
-   ```bash
-   cp .env.example .env
-   ```
+### Running the Server
+```bash
+# Development mode with auto-reload
+npm run dev
 
-4. Start development server:
-   ```bash
-   npm run dev
-   ```
-   The application will be live at `http://localhost:3000/`.
+# Production mode
+npm start
+```
 
-5. Build for production:
-   ```bash
-   npm run build
-   ```
+API will be available at `http://localhost:5000/api/v1`.
 
-## 👥 Team Ownership
-- **Developer 1 (Suchitra):** Backend API (Node.js/Express), PostgreSQL Database, Payment Webhooks.
-- **Developer 2 (Mrinmayee):** React Application, UI/UX, API Integration Layer, Donation Flow, Admin UI.
-- **Developer 3:** QA, DevOps, Testing & CI/CD.
+### Running Tests
+```bash
+npm test
+```
 
-## 📜 Section 80G Tax Exemption
-All donations to SECT qualify for 50% tax deductions under Section 80G of the Indian Income Tax Act. Official certificates (Form 10BE) are generated upon verified transaction completion.
+---
+
+## Documentation
+- [API Contract](docs/API.md): Detailed REST endpoints, request/response schemas, and status codes.
+- [Database Specification](docs/DATABASE.md): PostgreSQL schemas, table definitions, and constraints.
+- [Team Rules](ANTIGRAVITY_TEAM_RULES.md): Antigravity team guidelines and role boundaries.
