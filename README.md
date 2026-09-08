@@ -1,30 +1,64 @@
 # Saraswati Educational & Charitable Trust (SECT) Web Application
 
-Web application and management system for the Saraswati Educational & Charitable Trust (SECT).
+SECT is a web application and management system for the Saraswati Educational & Charitable Trust, supporting education, renewable energy, environmental protection, sustainable livelihoods, agriculture, solid-waste management, and community welfare.
 
 The Trust operates in education, renewable energy, environmental protection, energy conservation, sustainable livelihoods, agriculture, solid-waste management, and community welfare.
 
 ---
 
-## 1. Repository Architecture & Ownership
+## Repository Structure
 
 As defined in `ANTIGRAVITY_TEAM_RULES.md`, the repository follows a multi-developer ownership model across 3 developers:
 
 ```text
 SECT/
-├── backend/            # [Suchitra] Node.js, Express REST API, auth & payment services
-├── database/           # [Suchitra] PostgreSQL migrations, seeds & runner
-├── docs/               # [Shared] API contracts, Database docs, Architecture
-├── tests/              # [Suchitra & Developer 3] Unit, integration & security tests
+├── frontend/           # React + Vite client application
+├── backend/            # Node.js + Express REST API
+├── database/           # PostgreSQL migrations and seeds
+├── docs/               # API and database documentation
+├── tests/              # Backend tests
 ├── ANTIGRAVITY_TEAM_RULES.md
 ├── suchitra-backend-plan.md
 └── mrinmayee-frontend-plan.md
 ```
 
-### Team Responsibilities
-- **Suchitra (Developer 1)**: Backend API, PostgreSQL database, JWT authentication, RBAC, payment gateway integration, webhooks, 80G tax receipts.
-- **Mrinmayee (Developer 2)**: React frontend application, public UI, admin UI, client-side API integration.
-- **Developer 3**: QA, DevOps, CI/CD, and deployment.
+## Frontend Setup
+
+Prerequisites: Node.js 18+ and npm 9+.
+
+```bash
+cd frontend
+npm install
+cp .env.example .env
+npm run dev
+```
+
+The Vite development server runs at `http://localhost:3000/` when configured by `vite.config.js`. Build with `npm run build`.
+
+## Backend Setup
+
+Prerequisites: Node.js 18+ and PostgreSQL 14+.
+
+```bash
+cd backend
+npm install
+cp .env.example .env
+```
+
+Update the database credentials and secret keys in `.env`, then run migrations and seeds:
+
+```bash
+npm run migrate:seed
+npm run dev
+```
+
+The API is available at `http://localhost:5000/api/v1`.
+
+## Team Ownership
+
+- **Suchitra:** Backend API, PostgreSQL database, JWT authentication, RBAC, payments, webhooks, and 80G receipts.
+- **Mrinmayee:** React frontend, public and admin UI, API integration, and donation flow.
+- **Developer 3:** QA, DevOps, CI/CD, and deployment.
 
 ---
 
@@ -71,7 +105,7 @@ npm test
 
 ---
 
-## 3. Documentation
+## Documentation
 - [API Contract](docs/API.md): Detailed REST endpoints, request/response schemas, and status codes.
 - [Database Specification](docs/DATABASE.md): PostgreSQL schemas, table definitions, and constraints.
 - [Team Rules](ANTIGRAVITY_TEAM_RULES.md): Antigravity team guidelines and role boundaries.
