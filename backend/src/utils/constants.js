@@ -1,0 +1,47 @@
+/**
+ * Global System Constants
+ * Author: Suchitra (Backend & Database Developer)
+ */
+
+module.exports = {
+  ROLES: {
+    ADMIN: 'ADMIN',
+    STAFF: 'STAFF',
+    MEMBER: 'MEMBER',
+    DONOR: 'DONOR',
+    VOLUNTEER: 'VOLUNTEER'
+  },
+
+  PROJECT_STATUS: {
+    DRAFT: 'DRAFT',
+    ACTIVE: 'ACTIVE',
+    COMPLETED: 'COMPLETED',
+    ARCHIVED: 'ARCHIVED'
+  },
+
+  DONATION_STATUS: {
+    PENDING: 'PENDING',
+    COMPLETED: 'COMPLETED',
+    FAILED: 'FAILED',
+    REFUNDED: 'REFUNDED'
+  },
+
+  PAYMENT_STATUS: {
+    CREATED: 'CREATED',
+    CAPTURED: 'CAPTURED',
+    FAILED: 'FAILED'
+  },
+
+  INQUIRY_STATUS: {
+    PENDING: 'PENDING',
+    IN_REVIEW: 'IN_REVIEW',
+    RESOLVED: 'RESOLVED'
+  },
+
+  VOLUNTEER_STATUS: {
+    NEW: 'NEW',
+    INTERVIEWED: 'INTERVIEWED',
+    ACCEPTED: 'ACCEPTED',
+    REJECTED: 'REJECTED'
+  }
+};
