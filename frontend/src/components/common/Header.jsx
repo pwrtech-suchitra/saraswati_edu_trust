@@ -50,21 +50,7 @@ export default function Header() {
             textDecoration: 'none',
           }}
         >
-          <div
-            style={{
-              width: '42px',
-              height: '42px',
-              borderRadius: '10px',
-              background: 'linear-gradient(135deg, var(--color-primary-600) 0%, var(--color-teal-600) 100%)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: 'var(--color-white)',
-              boxShadow: 'var(--shadow-sm)',
-            }}
-          >
-            <Sun size={24} color="#fef08a" />
-          </div>
+          <img src="/logo.png" alt="SECT Logo" style={{ width: "46px", height: "46px", borderRadius: "50%", objectFit: "cover", boxShadow: "var(--shadow-sm)", border: "2px solid white" }} />
           <div>
             <div
               style={{
