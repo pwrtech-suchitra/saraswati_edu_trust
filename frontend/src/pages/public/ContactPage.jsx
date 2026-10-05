@@ -84,8 +84,8 @@ export default function ContactPage() {
                   <div>
                     <h4 style={{ fontSize: '1rem', marginBottom: '0.2rem' }}>Registered Head Office</h4>
                     <p style={{ fontSize: '0.92rem', color: 'var(--color-slate-600)' }}>
-                      Plot 42/B, Chandrasekharpur, Near Infocity,<br />
-                      Bhubaneswar, Odisha 751024, India
+                      K-8-82, Kalinga Nagar, Ghatikia,<br />
+                      Bhubaneswar, Odisha-751029
                     </p>
                   </div>
                 </div>
@@ -97,8 +97,7 @@ export default function ContactPage() {
                   <div>
                     <h4 style={{ fontSize: '1rem', marginBottom: '0.2rem' }}>Email Inquiries</h4>
                     <p style={{ fontSize: '0.92rem', color: 'var(--color-slate-600)' }}>
-                      contact@sect-trust.org<br />
-                      donations@sect-trust.org
+                      strust12@gmail.com
                     </p>
                   </div>
                 </div>
@@ -110,8 +109,8 @@ export default function ContactPage() {
                   <div>
                     <h4 style={{ fontSize: '1rem', marginBottom: '0.2rem' }}>Helpline & Phone</h4>
                     <p style={{ fontSize: '0.92rem', color: 'var(--color-slate-600)' }}>
-                      +91 (0674) 274-8890<br />
-                      +91 94370 12345 (Donor Assistance)
+                      0674-2954256<br />
+                      Mobile: 9937159760, 9438747172
                     </p>
                   </div>
                 </div>

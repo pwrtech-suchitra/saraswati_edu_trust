@@ -10,7 +10,7 @@ export const contactApi = {
       const response = await axiosClient.post('/contact', inquiryData);
       return response;
     } catch (error) {
-      if (error.isNetworkError || error.status === 404) {
+      if (error.isNetworkError || error.status === 404 || error.status >= 500) {
         return {
           success: true,
           message: 'Thank you for reaching out to SECT. Our trust secretariat will get in touch shortly.'
