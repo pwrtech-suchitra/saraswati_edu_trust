@@ -121,15 +121,15 @@ export default function Footer() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', fontSize: '0.9rem', color: 'var(--color-slate-400)' }}>
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
                 <MapPin size={18} color="var(--color-amber-500)" style={{ flexShrink: 0, marginTop: '0.2rem' }} />
-                <span>SECT Central Office, Plot 42/B, Chandrasekharpur, Bhubaneswar, Odisha 751024</span>
+                <span>SECT Central Office, K-8-82, Kalinga Nagar, Ghatikia, Bhubaneswar, Odisha-751029</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                 <Mail size={18} color="var(--color-amber-500)" style={{ flexShrink: 0 }} />
-                <span>contact@sect-trust.org</span>
+                <span>strust12@gmail.com</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                 <Phone size={18} color="var(--color-amber-500)" style={{ flexShrink: 0 }} />
-                <span>+91 (0674) 274-8890</span>
+                <span>0674-2954256, 9937159760, 9438747172</span>
               </div>
             </div>
           </div>

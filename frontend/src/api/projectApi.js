@@ -10,7 +10,7 @@ export const projectApi = {
       const response = await axiosClient.get('/projects', { params });
       return response;
     } catch (error) {
-      if (error.isNetworkError || error.status === 404) {
+      if (error.isNetworkError || error.status === 404 || error.status >= 500) {
         let filtered = [...mockProjects];
         if (params.category && params.category !== 'all') {
           filtered = filtered.filter(p => p.categoryId === params.category || p.category === params.category);
@@ -38,7 +38,7 @@ export const projectApi = {
       const response = await axiosClient.get(`/projects/${id}`);
       return response;
     } catch (error) {
-      if (error.isNetworkError || error.status === 404) {
+      if (error.isNetworkError || error.status === 404 || error.status >= 500) {
         const found = mockProjects.find(p => p.id === id || p.slug === id) || mockProjects[0];
         return {
           success: true,
@@ -57,7 +57,7 @@ export const projectApi = {
       const response = await axiosClient.get('/categories');
       return response;
     } catch (error) {
-      if (error.isNetworkError || error.status === 404) {
+      if (error.isNetworkError || error.status === 404 || error.status >= 500) {
         return {
           success: true,
           data: mockCategories

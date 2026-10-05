@@ -37,7 +37,7 @@ export default function AboutPage() {
                 <h3 style={{ fontSize: '1.4rem' }}>Our Mission</h3>
               </div>
               <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--color-slate-600)' }}>
-                To bridge rural and underprivileged inequalities by deploying sustainable educational resources, renewable solar micro-infrastructure, women-led agricultural and handloom cooperatives, and community-centric environmental protection programs.
+                To provide energy and support to the weaker and backward tribal community to empower them so that they can become capable of make use of the resource and to create an environment where they can play the decision making role in the society and to manage the resources through the participatory value based process. We have been working on 5P principle i.e. Prosperity (Economic Sustainability), Planet (Environmental Sustainability), People (Social Sustainability), Peace and Partnership to have sustainable development.
               </p>
             </div>
 
@@ -47,7 +47,7 @@ export default function AboutPage() {
                 <h3 style={{ fontSize: '1.4rem' }}>Our Vision</h3>
               </div>
               <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--color-slate-600)' }}>
-                A self-reliant, enlightened, and sustainable society where every child has access to continuous education, every community is powered by clean renewable energy, and traditional rural artisans thrive with pride and prosperity.
+                To explore, develop and sustain efforts for develop renewable energy sector and enhance its natural resources use.
               </p>
             </div>
           </div>
