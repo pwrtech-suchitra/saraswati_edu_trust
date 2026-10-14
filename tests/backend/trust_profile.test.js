@@ -6,8 +6,30 @@
 
 const test = require('node:test');
 const assert = require('node:assert');
+const fs = require('node:fs');
+const os = require('node:os');
+const path = require('node:path');
+
+const testDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'sect-trust-profile-'));
+process.env.USE_EMBEDDED_DB = 'true';
+process.env.PGLITE_DATA_DIR = testDataDir;
+
 const db = require('../../backend/src/config/db');
 const trustProfileController = require('../../backend/src/controllers/trustProfileController');
+
+test.before(async () => {
+  const migrationsDir = path.join(__dirname, '../../database/migrations');
+  const migrationFiles = fs.readdirSync(migrationsDir)
+    .filter((file) => file.endsWith('.sql'))
+    .sort();
+
+  for (const file of migrationFiles) {
+    await db.exec(fs.readFileSync(path.join(migrationsDir, file), 'utf8'));
+  }
+
+  const seedPath = path.join(__dirname, '../../database/seeds/007_trust_profile_seed.sql');
+  await db.exec(fs.readFileSync(seedPath, 'utf8'));
+});
 
 function createMockRes() {
   const res = {
@@ -84,4 +106,5 @@ test('getMissionSustainableIndia returns 5Ps, 6th P, and strategic highlights fr
 
 test.after(async () => {
   await db.pool.end();
+  fs.rmSync(testDataDir, { recursive: true, force: true });
 });

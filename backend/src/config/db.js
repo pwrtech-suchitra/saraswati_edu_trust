@@ -11,7 +11,9 @@ const { PGlite } = require('@electric-sql/pglite');
 const config = require('./env');
 
 const isProduction = config.nodeEnv === 'production';
-const pgDataDir = path.resolve(__dirname, '../../../database/pgdata');
+const pgDataDir = path.resolve(
+  process.env.PGLITE_DATA_DIR || path.join(__dirname, '../../../database/pgdata')
+);
 
 // Ensure pgdata dir exists
 if (!fs.existsSync(pgDataDir)) {
