@@ -54,10 +54,10 @@ async function verifyAndFinalizePayment(data) {
   const razorpaySignature = data.razorpaySignature || data.razorpay_signature;
 
   // 1. Signature check
-  // In development, allow bypass only if testing with demo keys
+  // In development, allow bypass only for recognized mock signatures
   const isDevBypass = config.nodeEnv === 'development' && (
     razorpaySignature === 'mock_signature_for_testing' ||
-    razorpaySignature.startsWith('sig_mock_signature_')
+    (typeof razorpaySignature === 'string' && razorpaySignature.startsWith('sig_mock_signature_'))
   );
   const isValidSignature = isDevBypass || verifyPaymentSignature({
     orderId: razorpayOrderId,

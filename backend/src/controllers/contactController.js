@@ -79,11 +79,14 @@ async function listInquiries(req, res, next) {
 async function updateInquiryStatus(req, res, next) {
   try {
     const { id } = req.params;
-    const { status } = req.body;
-    const result = await db.query(
-      'UPDATE inquiries SET status = $1 WHERE id = $2 RETURNING *',
-      [status, id]
-    );
+    const { status, admin_notes } = req.body;
+    const text = `
+      UPDATE inquiries
+      SET status = COALESCE($1, status), admin_notes = COALESCE($2, admin_notes), updated_at = CURRENT_TIMESTAMP
+      WHERE id = $3
+      RETURNING *
+    `;
+    const result = await db.query(text, [status, admin_notes, id]);
     if (result.rowCount === 0) {
       return ApiResponse.error(res, 'Inquiry not found', [], 404);
     }

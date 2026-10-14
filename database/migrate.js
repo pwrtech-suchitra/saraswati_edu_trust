@@ -1,25 +1,16 @@
 /**
  * Standalone Database Migration & Seeder Runner
+ * Uses Adaptive PostgreSQL Connection (External Pool or Persistent PGlite)
  * Author: Suchitra (Backend & Database Developer)
  */
 
 const fs = require('fs');
 const path = require('path');
-const { createRequire } = require('module');
-const backendRequire = createRequire(path.join(__dirname, '../backend/package.json'));
-const { Pool } = backendRequire('pg');
-backendRequire('dotenv').config({ path: path.join(__dirname, '../backend/.env') });
-
-const connectionString = process.env.DATABASE_URL || 'postgres://postgres:postgres@localhost:5432/sect_db';
-
-const pool = new Pool({
-  connectionString,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
-});
+const db = require('../backend/src/config/db');
 
 async function runMigrations() {
-  const client = await pool.connect();
-  console.log('[Migration] Connected to PostgreSQL...');
+  const client = await db.getClient();
+  console.log('[Migration] Database client acquired...');
 
   try {
     // 1. Create migration history tracking table
@@ -42,10 +33,8 @@ async function runMigrations() {
       if (checkRes.rowCount === 0) {
         console.log(`[Migration] Executing: ${file}`);
         const sql = fs.readFileSync(path.join(migrationsDir, file), 'utf-8');
-        await client.query('BEGIN');
-        await client.query(sql);
+        await (client.exec ? client.exec(sql) : client.query(sql));
         await client.query('INSERT INTO schema_migrations (filename) VALUES ($1)', [file]);
-        await client.query('COMMIT');
         console.log(`[Migration] Completed: ${file}`);
       } else {
         console.log(`[Migration] Skipped (already applied): ${file}`);
@@ -63,7 +52,7 @@ async function runMigrations() {
       for (const file of seedFiles) {
         console.log(`[Seed] Executing: ${file}`);
         const sql = fs.readFileSync(path.join(seedsDir, file), 'utf-8');
-        await client.query(sql);
+        await (client.exec ? client.exec(sql) : client.query(sql));
         console.log(`[Seed] Completed: ${file}`);
       }
     }
@@ -75,7 +64,7 @@ async function runMigrations() {
     process.exitCode = 1;
   } finally {
     client.release();
-    await pool.end();
+    await db.pool.end();
   }
 }
 

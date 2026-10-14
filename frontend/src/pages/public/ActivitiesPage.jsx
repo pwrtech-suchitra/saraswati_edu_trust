@@ -1,179 +1,256 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
-  GraduationCap,
+  Leaf,
+  Briefcase,
+  Sprout,
+  Users,
+  CheckCircle2,
   Sun,
-  Sparkles,
-  HeartHandshake,
-  Recycle,
-  Building2,
-  CheckCircle
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Button from '../../components/common/Button';
+import { trustProfileApi } from '../../api/trustProfileApi';
+import { Spinner } from '../../components/common/Loader';
 
 export default function ActivitiesPage() {
-  const activities = [
-    {
-      icon: GraduationCap,
-      title: 'Charity & Quality Education',
-      color: 'var(--color-primary-600)',
-      bg: 'var(--color-primary-100)',
-      points: [
-        'Saraswati Girls Higher Education Scholarship fund covering collegiate degree courses',
-        'Distribution of textbooks, STEM kits, and digital tablets in tribal districts',
-        'Establishing community reading rooms and digital village libraries',
-        'Remedial coaching centres for drop-out prevention among 1st-generation learners',
-      ],
-    },
-    {
-      icon: Sun,
-      title: 'Renewable Energy & Solar Adoption',
-      color: 'var(--color-amber-600)',
-      bg: 'var(--color-amber-100)',
-      points: [
-        'Equipping rural government schools and anganwadis with off-grid rooftop solar packs',
-        'Solar powered deep-tube-well community drinking water filtration systems',
-        'Technical skilling of local rural youth as certified solar PV technicians',
-        'Solar street lighting for remote tribal hamlets lacking grid connectivity',
-      ],
-    },
-    {
-      icon: Sparkles,
-      title: 'Sustainable Livelihood & Agriculture',
-      color: 'var(--color-teal-600)',
-      bg: 'var(--color-teal-100)',
-      points: [
-        'Training women self-help groups (SHGs) in organic khadi handloom weaving and natural dyes',
-        'Organic farming workshops, seed banks, and non-pesticide management clusters',
-        'Rural micro-enterprise incubation and direct market linkage without middlemen',
-        'Mushroom cultivation and beekeeping for supplementary household income',
-      ],
-    },
-    {
-      icon: Recycle,
-      title: 'Solid Waste Management & Environment',
-      color: '#15803d',
-      bg: '#dcfce7',
-      points: [
-        'Decentralized community aerobic composting for wet organic waste in semi-urban wards',
-        'Annual indigenous tree plantation drives along riverbanks and degraded catchment areas',
-        'Plastic source-segregation awareness campaigns in public schools and markets',
-        'Conservation of native bio-diversity and sacred groves',
-      ],
-    },
-    {
-      icon: Building2,
-      title: 'Government Resource Mobilization',
-      color: '#4338ca',
-      bg: '#e0e7ff',
-      points: [
-        'Assisting rural villagers in applying for government welfare schemes and pensions',
-        'Facilitating tribal land rights documentation and bank account linkages',
-        'Coordinating with District Rural Development Agencies (DRDA) for infrastructure grants',
-        'Bridging corporate CSR funding with verified high-need grassroots requirements',
-      ],
-    },
-    {
-      icon: HeartHandshake,
-      title: 'Community Relief & Healthcare',
-      color: '#b91c1c',
-      bg: '#fee2e2',
-      points: [
-        'Mobile health vans and free eye screening camps in underserved rural pockets',
-        'Emergency cyclone, flood, and disaster relief ration distribution in coastal belts',
-        'Nutritional supplement drives for pregnant women and malnourished infants',
-        'Clean sanitation facilities and menstrual hygiene awareness in rural high schools',
-      ],
-    },
-  ];
+  const [pillars, setPillars] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [activePillarId, setActivePillarId] = useState('all');
+
+  useEffect(() => {
+    async function loadActivities() {
+      try {
+        const res = await trustProfileApi.getActivityPillars();
+        if (res.success && Array.isArray(res.data)) {
+          setPillars(res.data);
+        }
+      } catch (err) {
+        console.error('Error loading activity pillars from database:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadActivities();
+  }, []);
+
+  // Icon mapper helper
+  const getIcon = (id) => {
+    switch (id) {
+      case 'environmental':
+        return <Leaf size={28} />;
+      case 'livelihood':
+        return <Briefcase size={28} />;
+      case 'agriculture':
+        return <Sprout size={28} />;
+      case 'gov_mobilization':
+        return <Users size={28} />;
+      default:
+        return <Sun size={28} />;
+    }
+  };
+
+  const getPillarColor = (id) => {
+    switch (id) {
+      case 'environmental':
+        return { border: '#16a34a', bg: '#f0fdf4', text: '#15803d', badge: '#dcfce7' };
+      case 'livelihood':
+        return { border: '#0284c7', bg: '#f0f9ff', text: '#0369a1', badge: '#e0f2fe' };
+      case 'agriculture':
+        return { border: '#d97706', bg: '#fffbeb', text: '#b45309', badge: '#fef3c7' };
+      case 'gov_mobilization':
+        return { border: '#7c3aed', bg: '#faf5ff', text: '#6d28d9', badge: '#f3e8ff' };
+      default:
+        return { border: 'var(--color-primary-600)', bg: 'white', text: 'var(--color-primary-800)', badge: 'var(--color-primary-100)' };
+    }
+  };
+
+  const filteredPillars = activePillarId === 'all'
+    ? pillars
+    : pillars.filter(p => p.id === activePillarId);
 
   return (
     <div>
       {/* Banner */}
       <section style={{ backgroundColor: 'var(--color-primary-900)', color: 'white', padding: '4.5rem 0' }}>
-        <div className="container">
-          <span className="section-badge" style={{ backgroundColor: 'rgba(255,255,255,0.15)', color: '#fef08a' }}>
-            Impact In Action
+        <div className="container" style={{ textAlign: 'center' }}>
+          <span className="section-badge amber" style={{ margin: '0 auto 0.85rem' }}>
+            Official Activity Charter
           </span>
-          <h1 style={{ color: 'white', marginTop: '0.5rem', marginBottom: '1rem' }}>
-            Trust Core Activities & Initiatives
+          <h1 style={{ color: 'white', marginBottom: '1rem' }}>
+            Areas of Activities & Core Mandates
           </h1>
-          <p style={{ fontSize: '1.2rem', color: 'var(--color-slate-300)', maxWidth: '750px' }}>
-            Explore how SECT combines social welfare, technology, and community mobilization to spark sustainable change across Odisha.
+          <p style={{ fontSize: '1.2rem', color: 'var(--color-slate-300)', maxWidth: '780px', margin: '0 auto' }}>
+            Organized into 4 core pillars comprising 27 concrete mandates directly from the Saraswati Educational &amp; Charitable Trust Profile.
           </p>
         </div>
       </section>
 
-      {/* Grid of Activities */}
+      {/* Main Content */}
       <section className="section">
         <div className="container">
-          <div className="grid grid-cols-2" style={{ gap: '2.5rem' }}>
-            {activities.map((act, index) => {
-              const Icon = act.icon;
-              return (
-                <div key={index} className="card card-padded" style={{ display: 'flex', flexDirection: 'column' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.25rem' }}>
+          {loading ? (
+            <Spinner text="Loading activity pillars from database..." />
+          ) : (
+            <>
+              {/* Category Filter Tabs */}
+              <div style={{ display: 'flex', justifyContent: 'center', gap: '0.75rem', flexWrap: 'wrap', marginBottom: '3rem' }}>
+                <button
+                  type="button"
+                  onClick={() => setActivePillarId('all')}
+                  style={{
+                    padding: '0.65rem 1.4rem',
+                    borderRadius: '999px',
+                    fontSize: '0.92rem',
+                    fontWeight: 600,
+                    border: '1px solid var(--color-slate-300)',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    backgroundColor: activePillarId === 'all' ? 'var(--color-primary-700)' : 'white',
+                    color: activePillarId === 'all' ? 'white' : 'var(--color-slate-700)',
+                  }}
+                >
+                  All 4 Pillars (27 Mandates)
+                </button>
+                {pillars.map((p) => (
+                  <button
+                    key={p.id}
+                    type="button"
+                    onClick={() => setActivePillarId(p.id)}
+                    style={{
+                      padding: '0.65rem 1.4rem',
+                      borderRadius: '999px',
+                      fontSize: '0.92rem',
+                      fontWeight: 600,
+                      border: '1px solid var(--color-slate-300)',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s',
+                      backgroundColor: activePillarId === p.id ? 'var(--color-primary-700)' : 'white',
+                      color: activePillarId === p.id ? 'white' : 'var(--color-slate-700)',
+                    }}
+                  >
+                    {p.title} ({p.mandates?.length || 0})
+                  </button>
+                ))}
+              </div>
+
+              {/* Pillars Grid */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
+                {filteredPillars.map((pillar) => {
+                  const colors = getPillarColor(pillar.id);
+                  return (
                     <div
+                      key={pillar.id}
+                      className="card"
                       style={{
-                        width: '52px',
-                        height: '52px',
-                        borderRadius: '12px',
-                        backgroundColor: act.bg,
-                        color: act.color,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
+                        padding: '2.5rem',
+                        borderLeft: `8px solid ${colors.border}`,
+                        boxShadow: 'var(--shadow-md)',
                       }}
                     >
-                      <Icon size={26} />
+                      {/* Header */}
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.25rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                          <div
+                            style={{
+                              width: '52px',
+                              height: '52px',
+                              borderRadius: '12px',
+                              backgroundColor: colors.bg,
+                              color: colors.text,
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                            }}
+                          >
+                            {getIcon(pillar.id)}
+                          </div>
+                          <div>
+                            <span style={{ fontSize: '0.78rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px', color: colors.text }}>
+                              {pillar.category}
+                            </span>
+                            <h2 style={{ fontSize: '1.65rem', color: 'var(--color-slate-900)', margin: '0.15rem 0 0' }}>
+                              {pillar.title}
+                            </h2>
+                          </div>
+                        </div>
+
+                        <span
+                          style={{
+                            backgroundColor: colors.badge,
+                            color: colors.text,
+                            padding: '0.4rem 0.9rem',
+                            borderRadius: '999px',
+                            fontSize: '0.85rem',
+                            fontWeight: 700,
+                          }}
+                        >
+                          {pillar.mandates?.length || 0} Verbatim Mandates
+                        </span>
+                      </div>
+
+                      <p style={{ fontSize: '1.05rem', color: 'var(--color-slate-600)', lineHeight: '1.6', marginBottom: '2rem' }}>
+                        {pillar.summary}
+                      </p>
+
+                      {/* Mandates Checklist */}
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '1rem' }}>
+                        {pillar.mandates?.map((mandate, mIdx) => (
+                          <div
+                            key={mIdx}
+                            style={{
+                              backgroundColor: 'var(--color-slate-50)',
+                              padding: '1rem 1.25rem',
+                              borderRadius: '8px',
+                              border: '1px solid var(--color-slate-200)',
+                              display: 'flex',
+                              alignItems: 'flex-start',
+                              gap: '0.85rem',
+                            }}
+                          >
+                            <CheckCircle2 size={20} color={colors.border} style={{ flexShrink: 0, marginTop: '0.15rem' }} />
+                            <span style={{ fontSize: '0.93rem', color: 'var(--color-slate-800)', lineHeight: '1.5' }}>
+                              {mandate}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                    <h3 style={{ fontSize: '1.3rem' }}>{act.title}</h3>
-                  </div>
+                  );
+                })}
+              </div>
 
-                  <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.75rem', flex: 1 }}>
-                    {act.points.map((pt, pIdx) => (
-                      <li key={pIdx} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.65rem', fontSize: '0.94rem', color: 'var(--color-slate-600)' }}>
-                        <CheckCircle size={18} color="var(--color-primary-600)" style={{ flexShrink: 0, marginTop: '0.15rem' }} />
-                        <span>{pt}</span>
-                      </li>
-                    ))}
-                  </ul>
-
-                  <div style={{ marginTop: '1.75rem', paddingTop: '1.25rem', borderTop: '1px solid var(--color-slate-100)' }}>
-                    <Link to="/projects">
-                      <Button variant="outline" size="sm">
-                        View Active Projects
-                      </Button>
-                    </Link>
-                  </div>
+              {/* Call to Action */}
+              <div
+                style={{
+                  marginTop: '4rem',
+                  backgroundColor: 'var(--color-primary-900)',
+                  borderRadius: 'var(--border-radius-xl)',
+                  padding: '3.5rem',
+                  color: 'white',
+                  textAlign: 'center',
+                }}
+              >
+                <h3 style={{ color: 'white', fontSize: '1.8rem', marginBottom: '1rem' }}>
+                  Support Saraswati Educational &amp; Charitable Trust Initiatives
+                </h3>
+                <p style={{ color: 'var(--color-slate-300)', maxWidth: '650px', margin: '0 auto 2rem', fontSize: '1.05rem' }}>
+                  Every mandate is backed by verifiable on-ground grassroots implementation, official 80G tax receipts, and participatory community action.
+                </p>
+                <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+                  <Link to="/donate">
+                    <Button variant="amber" size="lg">
+                      Donate for the Mission (80G Eligible)
+                    </Button>
+                  </Link>
+                  <Link to="/contact">
+                    <Button variant="outline-white" size="lg">
+                      Partner with SECT
+                    </Button>
+                  </Link>
                 </div>
-              );
-            })}
-          </div>
-
-          <div
-            style={{
-              marginTop: '4rem',
-              textAlign: 'center',
-              backgroundColor: 'var(--color-white)',
-              padding: '3rem',
-              borderRadius: 'var(--border-radius-lg)',
-              border: '1px solid var(--color-slate-200)',
-            }}
-          >
-            <h3 style={{ marginBottom: '0.75rem' }}>Want to Volunteer or Sponsor an Activity?</h3>
-            <p style={{ color: 'var(--color-slate-500)', maxWidth: '580px', margin: '0 auto 1.75rem' }}>
-              We welcome CSR collaborations, individual volunteers, academic partnerships, and technical mentors.
-            </p>
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-              <Link to="/contact">
-                <Button variant="primary">Submit Volunteer Inquiry</Button>
-              </Link>
-              <Link to="/donate">
-                <Button variant="amber">Donate to Activities</Button>
-              </Link>
-            </div>
-          </div>
+              </div>
+            </>
+          )}
         </div>
       </section>
     </div>

@@ -7,7 +7,7 @@ import Button from '../../components/common/Button';
 import { useNotification } from '../../hooks/useNotification';
 
 export default function AdminInquiriesPage() {
-  const { showSuccess } = useNotification();
+  const { showSuccess, showError } = useNotification();
   const [inquiries, setInquiries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeInquiry, setActiveInquiry] = useState(null);
@@ -26,15 +26,19 @@ export default function AdminInquiriesPage() {
 
   const toggleResolved = async (inq) => {
     const newStatus = inq.status === 'RESOLVED' ? 'PENDING' : 'RESOLVED';
+    const previousStatus = inq.status;
     setInquiries((prev) =>
       prev.map((item) => (item.id === inq.id ? { ...item, status: newStatus } : item))
     );
     try {
-      await adminApi.updateInquiryStatus(inq.id, newStatus);
-    } catch {
-      // Fallback
+      await adminApi.updateInquiryStatus(inq.id, { status: newStatus });
+      showSuccess(`Marked inquiry as ${newStatus}`);
+    } catch (err) {
+      setInquiries((prev) =>
+        prev.map((item) => (item.id === inq.id ? { ...item, status: previousStatus } : item))
+      );
+      showError(err.message || 'Failed to update inquiry status.');
     }
-    showSuccess(`Marked inquiry as ${newStatus}`);
   };
 
   return (

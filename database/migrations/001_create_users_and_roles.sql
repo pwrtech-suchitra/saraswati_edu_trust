@@ -1,7 +1,9 @@
 -- Migration 001: Users, Roles, Permissions & RBAC
 -- Author: Suchitra (Backend & Database Developer)
 
-CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+-- gen_random_uuid() is built into PostgreSQL 13+
+-- CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+
 
 CREATE TABLE IF NOT EXISTS roles (
     id SERIAL PRIMARY KEY,

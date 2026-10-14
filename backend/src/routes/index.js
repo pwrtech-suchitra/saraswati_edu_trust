@@ -19,8 +19,13 @@ const reportRoutes = require('./reportRoutes');
 const healthRoutes = require('./healthRoutes');
 const projectController = require('../controllers/projectController');
 
+const trustProfileRoutes = require('./trustProfileRoutes');
+const trustProfileController = require('../controllers/trustProfileController');
+
 // Mount Modules
 router.use('/health', healthRoutes);
+router.use('/trust', trustProfileRoutes);
+router.get('/profile', trustProfileController.getTrustProfile);
 router.use('/auth', authRoutes);
 router.use('/projects', projectRoutes);
 router.get('/categories', projectController.listCategories);
