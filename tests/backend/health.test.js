@@ -29,3 +29,8 @@ test('Health controller format test', async () => {
   assert.strictEqual(typeof capturedBody.success, 'boolean');
   assert.ok(capturedBody.message);
 });
+
+test.after(async () => {
+  const db = require('../../backend/src/config/db');
+  await db.pool.end();
+});

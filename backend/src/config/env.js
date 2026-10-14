@@ -31,9 +31,15 @@ const config = {
   maxFileSizeMb: parseInt(process.env.MAX_FILE_SIZE_MB || '10', 10),
 
   trust: {
-    name: process.env.TRUST_NAME || 'Saraswati Educational & Charitable Trust (SECT)',
+    name: process.env.TRUST_NAME || 'Saraswati Educational & Charitable Trust',
+    shortName: 'SECT',
+    pan: process.env.TRUST_PAN || 'ABBTS7158P',
     registrationNo: process.env.TRUST_REG_NO || 'TRUST/OD/2018/0091',
-    exemption80GNo: process.env.TRUST_80G_NO || 'AAETS9821BF20214'
+    exemption80GNo: process.env.TRUST_80G_NO || 'AAETS9821BF20214',
+    address: 'K-8-82, Kalinga Nagar, Ghatikia, Bhubaneswar, Odisha-751029',
+    phone: '0674-2954256',
+    mobiles: ['9937159760', '9438747172'],
+    email: 'strust12@gmail.com'
   }
 };
 

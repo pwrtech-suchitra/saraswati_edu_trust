@@ -47,8 +47,11 @@ async function createPaymentOrder(donation) {
  */
 async function verifyAndFinalizePayment({ donationId, razorpayOrderId, razorpayPaymentId, razorpaySignature }) {
   // 1. Signature check
-  // In development, allow bypass only if testing with demo keys
-  const isDevBypass = config.nodeEnv === 'development' && razorpaySignature === 'mock_signature_for_testing';
+  // In development, allow bypass if testing with demo keys or simulator
+  const isDevBypass = config.nodeEnv === 'development' && (
+    razorpaySignature === 'mock_signature_for_testing' ||
+    (typeof razorpaySignature === 'string' && razorpaySignature.startsWith('sig_mock_signature_'))
+  );
   const isValidSignature = isDevBypass || verifyPaymentSignature({
     orderId: razorpayOrderId,
     paymentId: razorpayPaymentId,

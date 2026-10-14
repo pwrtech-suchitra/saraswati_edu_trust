@@ -1,88 +1,74 @@
 import axiosClient from './axiosClient';
-import { mockProjects, mockCategories } from './mockData';
+
+function normalizeProject(p) {
+  if (!p) return null;
+  return {
+    ...p,
+    id: p.id,
+    title: p.title,
+    slug: p.slug,
+    shortDescription: p.shortDescription || p.summary || '',
+    description: p.description || p.summary || '',
+    raisedAmount: Number(p.raisedAmount || p.raised_amount || 0),
+    targetAmount: Number(p.targetAmount || p.target_amount || 0),
+    imageUrl: p.imageUrl || p.hero_image_url || 'https://images.unsplash.com/photo-1509391365360-2e959784a276?auto=format&fit=crop&w=800&q=80',
+    category: p.category || p.category_name || 'General',
+    categoryId: p.categoryId || p.category_id || '',
+    donorCount: p.donorCount || 0,
+    impactMetrics: p.impactMetrics || [
+      { label: 'Beneficiaries', value: p.beneficiaries || 'Local Community' },
+      { label: 'Location', value: p.location || 'Odisha' },
+      { label: 'Status', value: p.status || 'ACTIVE' }
+    ]
+  };
+}
 
 export const projectApi = {
   /**
-   * List active projects with category and search filter
+   * List active projects with category and search filter directly from database
    */
   async listProjects(params = {}) {
-    try {
-      const response = await axiosClient.get('/projects', { params });
-      return response;
-    } catch (error) {
-      if (error.isNetworkError || error.status === 404 || error.status >= 500) {
-        let filtered = [...mockProjects];
-        if (params.category && params.category !== 'all') {
-          filtered = filtered.filter(p => p.categoryId === params.category || p.category === params.category);
-        }
-        if (params.search) {
-          const q = params.search.toLowerCase();
-          filtered = filtered.filter(p => p.title.toLowerCase().includes(q) || p.shortDescription.toLowerCase().includes(q));
-        }
-        return {
-          success: true,
-          message: 'Projects loaded (mock)',
-          data: filtered,
-          meta: { total: filtered.length, page: 1, limit: 10 }
-        };
-      }
-      throw error;
+    const response = await axiosClient.get('/projects', { params });
+    if (response && Array.isArray(response.data)) {
+      response.data = response.data.map(normalizeProject);
     }
+    return response;
   },
 
   /**
-   * Get single project by ID or slug
+   * Get single project by ID or slug directly from database
    */
   async getProject(id) {
-    try {
-      const response = await axiosClient.get(`/projects/${id}`);
-      return response;
-    } catch (error) {
-      if (error.isNetworkError || error.status === 404 || error.status >= 500) {
-        const found = mockProjects.find(p => p.id === id || p.slug === id) || mockProjects[0];
-        return {
-          success: true,
-          data: found
-        };
-      }
-      throw error;
+    const response = await axiosClient.get(`/projects/${id}`);
+    if (response && response.data) {
+      response.data = normalizeProject(response.data);
     }
+    return response;
   },
 
   /**
-   * List all trust project categories
+   * List all trust project categories directly from database
    */
   async listCategories() {
-    try {
-      const response = await axiosClient.get('/categories');
-      return response;
-    } catch (error) {
-      if (error.isNetworkError || error.status === 404 || error.status >= 500) {
-        return {
-          success: true,
-          data: mockCategories
-        };
-      }
-      throw error;
-    }
+    return await axiosClient.get('/categories');
   },
 
   /**
-   * Admin: Create new project
+   * Admin: Create new project in database
    */
   async createProject(projectData) {
     return await axiosClient.post('/projects', projectData);
   },
 
   /**
-   * Admin: Update existing project
+   * Admin: Update existing project in database
    */
   async updateProject(id, projectData) {
     return await axiosClient.put(`/projects/${id}`, projectData);
   },
 
   /**
-   * Admin: Delete project
+   * Admin: Delete project in database
    */
   async deleteProject(id) {
     return await axiosClient.delete(`/projects/${id}`);
