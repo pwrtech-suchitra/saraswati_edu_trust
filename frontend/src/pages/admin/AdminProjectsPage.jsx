@@ -74,11 +74,9 @@ export default function AdminProjectsPage() {
     try {
       await projectApi.deleteProject(id);
       setProjects((prev) => prev.filter((p) => p.id !== id));
-      showSuccess('Project record deactivated successfully');
-    } catch {
-      // Mock local deletion
-      setProjects((prev) => prev.filter((p) => p.id !== id));
-      showSuccess('Project removed (demo)');
+      showSuccess('Project record deactivated successfully in database');
+    } catch (err) {
+      showError(err.message || 'Failed to deactivate project from database');
     }
   };
 
@@ -91,32 +89,32 @@ export default function AdminProjectsPage() {
 
     try {
       if (editingId) {
-        await projectApi.updateProject(editingId, formData);
-        setProjects((prev) =>
-          prev.map((p) =>
-            p.id === editingId
-              ? { ...p, ...formData, targetAmount: Number(formData.targetAmount) }
-              : p
-          )
-        );
-        showSuccess('Project updated successfully');
+        await projectApi.updateProject(editingId, {
+          title: formData.title,
+          summary: formData.shortDescription,
+          description: formData.shortDescription,
+          target_amount: Number(formData.targetAmount),
+          category_id: formData.categoryId ? Number(formData.categoryId) : undefined,
+          hero_image_url: formData.imageUrl
+        });
+        showSuccess('Project updated successfully in database');
       } else {
-        const newProj = {
-          id: 'proj-' + Date.now(),
-          ...formData,
-          targetAmount: Number(formData.targetAmount),
-          raisedAmount: 0,
-          donorCount: 0,
-          category: categories.find((c) => c.id === formData.categoryId)?.name || 'General',
-          status: 'ACTIVE',
-        };
-        await projectApi.createProject(newProj).catch(() => null);
-        setProjects((prev) => [newProj, ...prev]);
-        showSuccess('New initiative added to Trust roster');
+        await projectApi.createProject({
+          title: formData.title,
+          summary: formData.shortDescription,
+          description: formData.shortDescription,
+          target_amount: Number(formData.targetAmount),
+          category_id: formData.categoryId ? Number(formData.categoryId) : 1,
+          hero_image_url: formData.imageUrl || 'https://images.unsplash.com/photo-1509391365360-2e959784a276?auto=format&fit=crop&w=800&q=80',
+          location: 'Odisha'
+        });
+        showSuccess('New initiative created successfully in database');
       }
       setModalOpen(false);
+      const res = await projectApi.listProjects();
+      if (res && res.data) setProjects(res.data);
     } catch (err) {
-      showError(err.message || 'Operation failed');
+      showError(err.message || 'Database operation failed');
     }
   };
 

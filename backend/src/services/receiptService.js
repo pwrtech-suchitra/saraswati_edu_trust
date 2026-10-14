@@ -81,6 +81,8 @@ function buildReceiptData({ receiptNumber, financialYear, donation, transactionI
     financial_year: financialYear,
     trust: {
       name: config.trust.name,
+      pan: config.trust.pan,
+      address: config.trust.address,
       registration_no: config.trust.registrationNo,
       section_80g_no: config.trust.exemption80GNo
     },

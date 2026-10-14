@@ -2,121 +2,117 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Heart,
-  Sun,
-  GraduationCap,
-  Sparkles,
-  TreePine,
+  Leaf,
+  Briefcase,
+  Sprout,
+  Users,
   ShieldCheck,
   ArrowRight,
-  TrendingUp,
-  Award,
-  BookOpen
+  Sparkles,
+  QrCode,
+  Building2
 } from 'lucide-react';
 import { projectApi } from '../../api/projectApi';
+import { trustProfileApi } from '../../api/trustProfileApi';
 import ProjectCard from '../../components/cards/ProjectCard';
 import { CardSkeleton } from '../../components/common/Loader';
 import Button from '../../components/common/Button';
 
 export default function HomePage() {
   const [featuredProjects, setFeaturedProjects] = useState([]);
+  const [trustProfile, setTrustProfile] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function loadProjects() {
+    async function loadData() {
       try {
-        const res = await projectApi.listProjects({ limit: 3 });
-        if (res.success && Array.isArray(res.data)) {
-          setFeaturedProjects(res.data.slice(0, 3));
+        const [projRes, profileRes] = await Promise.all([
+          projectApi.listProjects({ limit: 3 }),
+          trustProfileApi.getProfile()
+        ]);
+        if (projRes.success && Array.isArray(projRes.data)) {
+          setFeaturedProjects(projRes.data.slice(0, 3));
+        }
+        if (profileRes.success && profileRes.data) {
+          setTrustProfile(profileRes.data);
         }
       } catch (err) {
-        console.error('Failed to load featured projects:', err);
+        console.error('Failed to load homepage data from database:', err);
       } finally {
         setLoading(false);
       }
     }
-    loadProjects();
+    loadData();
   }, []);
 
   return (
     <div>
       {/* 1. HERO SECTION */}
-      <section
-        style={{
-          background: 'radial-gradient(circle at 80% 20%, rgba(20, 85, 65, 0.95) 0%, #08281d 100%)',
-          color: 'var(--color-white)',
-          paddingTop: '5rem',
-          paddingBottom: '6rem',
-          position: 'relative',
-          overflow: 'hidden',
-        }}
-      >
-        {/* Subtle decorative circles */}
-        <div
-          style={{
-            position: 'absolute',
-            top: '-15%',
-            right: '-10%',
-            width: '600px',
-            height: '600px',
-            borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(232, 149, 40, 0.15) 0%, rgba(0,0,0,0) 70%)',
-            pointerEvents: 'none',
-          }}
+      <section className="home-hero">
+        <img
+          src="/images/sect-hero.jpe"
+          alt="SECT community and sustainability initiative"
+          className="home-hero-image"
         />
 
-        <div className="container" style={{ position: 'relative', zIndex: 1 }}>
-          <div style={{ maxWidth: '820px' }}>
+        <div className="home-hero-overlay" />
+
+        <div className="container home-hero-content">
+          <div className="home-hero-inner">
             <div
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '0.5rem',
-                backgroundColor: 'rgba(255, 255, 255, 0.12)',
+                backgroundColor: 'rgba(255, 255, 255, 0.15)',
                 backdropFilter: 'blur(6px)',
                 padding: '0.45rem 1rem',
                 borderRadius: '999px',
                 fontSize: '0.85rem',
                 fontWeight: 600,
                 color: '#fef08a',
-                marginBottom: '1.75rem',
+                marginBottom: '1.25rem',
+                border: '1px solid rgba(255,255,255,0.2)',
               }}
             >
               <ShieldCheck size={16} />
-              <span>Saraswati Educational & Charitable Trust — Registered Public Trust</span>
+              <span>Saraswati Educational &amp; Charitable Trust • Registered NGO</span>
             </div>
 
             <h1
               style={{
-                color: 'var(--color-white)',
-                marginBottom: '1.5rem',
+                color: 'white',
+                fontSize: 'clamp(2.2rem, 5vw, 3.4rem)',
                 fontWeight: 800,
                 lineHeight: 1.15,
+                marginBottom: '1.25rem',
+                letterSpacing: '-0.5px',
               }}
             >
-              Empowering Rural Communities Through Education, Clean Energy & Sustainable Livelihood
+              Empowering Rural &amp; Tribal Communities Through Renewable Energy &amp; Sustainable Governance
             </h1>
 
             <p
               style={{
-                fontSize: '1.25rem',
-                lineHeight: 1.6,
-                color: 'rgba(255, 255, 255, 0.85)',
-                marginBottom: '2.5rem',
+                fontSize: '1.18rem',
+                color: 'rgba(255, 255, 255, 0.92)',
                 maxWidth: '720px',
+                lineHeight: 1.7,
+                marginBottom: '2.25rem',
               }}
             >
-              Dedicated to uplifting underprivileged communities across Odisha and eastern India with solar power for rural schools, girl child scholarships, organic livelihoods, and environmental restoration.
+              A committed NGO active in community capacity building, clean solar electrification, mobile livestock care, organic dairy training, and Mission Sustainable India.
             </p>
 
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', alignItems: 'center' }}>
               <Link to="/donate">
                 <Button variant="amber" size="lg" icon={Heart}>
-                  Support Our Mission
+                  Donate with 80G Tax Benefit
                 </Button>
               </Link>
               <Link to="/projects">
                 <Button variant="outline-white" size="lg" icon={ArrowRight}>
-                  View Active Projects
+                  Explore Community Projects
                 </Button>
               </Link>
             </div>
@@ -141,17 +137,7 @@ export default function HomePage() {
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '1.2rem' }}>
               <div className="stat-icon-wrap stat-icon-emerald">
-                <GraduationCap size={28} />
-              </div>
-              <div>
-                <div className="stat-value">12,000+</div>
-                <div className="stat-label">Children Educated</div>
-              </div>
-            </div>
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1.2rem' }}>
-              <div className="stat-icon-wrap stat-icon-amber">
-                <Sun size={28} />
+                <Leaf size={28} />
               </div>
               <div>
                 <div className="stat-value">50+</div>
@@ -160,12 +146,22 @@ export default function HomePage() {
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '1.2rem' }}>
-              <div className="stat-icon-wrap stat-icon-teal">
-                <Sparkles size={28} />
+              <div className="stat-icon-wrap stat-icon-amber">
+                <Briefcase size={28} />
               </div>
               <div>
-                <div className="stat-value">1,500+</div>
-                <div className="stat-label">Artisans Empowered</div>
+                <div className="stat-value">8,500+</div>
+                <div className="stat-label">Livestock Treated</div>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1.2rem' }}>
+              <div className="stat-icon-wrap stat-icon-teal">
+                <Sprout size={28} />
+              </div>
+              <div>
+                <div className="stat-value">1,200+</div>
+                <div className="stat-label">Organic Farmers Trained</div>
               </div>
             </div>
 
@@ -182,129 +178,179 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 3. FOUR CORE PILLARS */}
+      {/* 3. FOUR CORE ACTIVITY PILLARS (AS PER OFFICIAL PDF) */}
       <section className="section">
         <div className="container">
           <div className="section-title-wrap">
-            <span className="section-badge">Strategic Focus</span>
-            <h2 className="section-title">Our Core Action Pillars</h2>
+            <span className="section-badge">Official Trust Charter</span>
+            <h2 className="section-title">Our 4 Core Activity Pillars</h2>
             <p className="section-desc">
-              Addressing multi-dimensional socio-economic challenges with sustainable, locally rooted programs.
+              Structured into 27 authentic mandates across environmental protection, livelihood, organic agriculture, and governance mobilization.
             </p>
           </div>
 
           <div className="grid grid-cols-4">
             {/* Pillar 1 */}
-            <div className="card card-padded">
+            <div className="card card-padded" style={{ borderTop: '4px solid #16a34a' }}>
               <div
                 style={{
                   width: '52px',
                   height: '52px',
                   borderRadius: '12px',
-                  background: 'var(--color-primary-100)',
-                  color: 'var(--color-primary-700)',
+                  background: '#dcfce7',
+                  color: '#15803d',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   marginBottom: '1.25rem',
                 }}
               >
-                <GraduationCap size={28} />
+                <Leaf size={28} />
               </div>
-              <h3 style={{ fontSize: '1.25rem', marginBottom: '0.75rem' }}>Child Education & STEM</h3>
-              <p style={{ fontSize: '0.92rem', color: 'var(--color-slate-600)' }}>
-                Scholarships for young women, rural library installations, digital literacy labs, and teacher capability building.
+              <h3 style={{ fontSize: '1.25rem', marginBottom: '0.75rem' }}>Environmental &amp; Renewable Energy</h3>
+              <p style={{ fontSize: '0.92rem', color: 'var(--color-slate-600)', marginBottom: '1rem' }}>
+                Solar, wind, and biomass energy technologies; prefeasibility assessments; bio-compost and solid waste recycling (10 Mandates).
               </p>
+              <Link to="/activities" style={{ fontSize: '0.85rem', color: '#15803d', fontWeight: 600 }}>
+                View 10 Mandates →
+              </Link>
             </div>
 
             {/* Pillar 2 */}
-            <div className="card card-padded">
+            <div className="card card-padded" style={{ borderTop: '4px solid #0284c7' }}>
               <div
                 style={{
                   width: '52px',
                   height: '52px',
                   borderRadius: '12px',
-                  background: 'var(--color-amber-100)',
-                  color: 'var(--color-amber-600)',
+                  background: '#e0f2fe',
+                  color: '#0369a1',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   marginBottom: '1.25rem',
                 }}
               >
-                <Sun size={28} />
+                <Briefcase size={28} />
               </div>
-              <h3 style={{ fontSize: '1.25rem', marginBottom: '0.75rem' }}>Solar & Clean Energy</h3>
-              <p style={{ fontSize: '0.92rem', color: 'var(--color-slate-600)' }}>
-                Off-grid rooftop solar packs for rural hospitals and educational institutions, solar water pumps, and clean tech training.
+              <h3 style={{ fontSize: '1.25rem', marginBottom: '0.75rem' }}>Innovative Livelihood</h3>
+              <p style={{ fontSize: '0.92rem', color: 'var(--color-slate-600)', marginBottom: '1rem' }}>
+                Mobile Live-stock Hospital, women SHG processing units, water harvesting to check migration, and cattle improvement (6 Mandates).
               </p>
+              <Link to="/activities" style={{ fontSize: '0.85rem', color: '#0369a1', fontWeight: 600 }}>
+                View 6 Mandates →
+              </Link>
             </div>
 
             {/* Pillar 3 */}
-            <div className="card card-padded">
+            <div className="card card-padded" style={{ borderTop: '4px solid #d97706' }}>
               <div
                 style={{
                   width: '52px',
                   height: '52px',
                   borderRadius: '12px',
-                  background: 'var(--color-teal-100)',
-                  color: 'var(--color-teal-700)',
+                  background: '#fef3c7',
+                  color: '#b45309',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   marginBottom: '1.25rem',
                 }}
               >
-                <Sparkles size={28} />
+                <Sprout size={28} />
               </div>
-              <h3 style={{ fontSize: '1.25rem', marginBottom: '0.75rem' }}>Sustainable Livelihoods</h3>
-              <p style={{ fontSize: '0.92rem', color: 'var(--color-slate-600)' }}>
-                Handloom weaving collectives, organic natural dye adoption, organic farm clusters, and women micro-enterprises.
+              <h3 style={{ fontSize: '1.25rem', marginBottom: '0.75rem' }}>Agricultural Development</h3>
+              <p style={{ fontSize: '0.92rem', color: 'var(--color-slate-600)', marginBottom: '1rem' }}>
+                Technologically sound eco-agriculture, low-cost high-yield models, organic farming, and Organic Dairy Farm &amp; Training Centre (4 Mandates).
               </p>
+              <Link to="/activities" style={{ fontSize: '0.85rem', color: '#b45309', fontWeight: 600 }}>
+                View 4 Mandates →
+              </Link>
             </div>
 
             {/* Pillar 4 */}
-            <div className="card card-padded">
+            <div className="card card-padded" style={{ borderTop: '4px solid #7c3aed' }}>
               <div
                 style={{
                   width: '52px',
                   height: '52px',
                   borderRadius: '12px',
-                  background: 'var(--color-slate-100)',
-                  color: 'var(--color-slate-800)',
+                  background: '#f3e8ff',
+                  color: '#6d28d9',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   marginBottom: '1.25rem',
                 }}
               >
-                <TreePine size={28} />
+                <Users size={28} />
               </div>
-              <h3 style={{ fontSize: '1.25rem', marginBottom: '0.75rem' }}>Solid Waste & Ecology</h3>
-              <p style={{ fontSize: '0.92rem', color: 'var(--color-slate-600)' }}>
-                Decentralized municipal wet-waste composting units, indigenous tree planting drives, and clean river initiatives.
+              <h3 style={{ fontSize: '1.25rem', marginBottom: '0.75rem' }}>Govt. Resource Mobilization</h3>
+              <p style={{ fontSize: '0.92rem', color: 'var(--color-slate-600)', marginBottom: '1rem' }}>
+                Advocacy to alleviate poverty, community participation in Gram Panchayats, and training village-level para-professionals (7 Mandates).
               </p>
+              <Link to="/activities" style={{ fontSize: '0.85rem', color: '#6d28d9', fontWeight: 600 }}>
+                View 7 Mandates →
+              </Link>
             </div>
           </div>
         </div>
       </section>
 
-      {/* 4. FEATURED PROJECTS SECTION */}
-      <section className="section" style={{ backgroundColor: 'var(--color-white)', borderTop: '1px solid var(--color-slate-200)', borderBottom: '1px solid var(--color-slate-200)' }}>
+      {/* 4. MISSION SUSTAINABLE INDIA SPOTLIGHT BANNER */}
+      <section className="section" style={{ backgroundColor: '#f0fdf4', borderTop: '1px solid #bbf7d0', borderBottom: '1px solid #bbf7d0' }}>
         <div className="container">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '3rem', flexWrap: 'wrap', gap: '1rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.4fr) minmax(0, 0.8fr)', gap: '3rem', alignItems: 'center' }}>
             <div>
-              <span className="section-badge amber">Make An Impact</span>
-              <h2 className="section-title">Active Community Projects</h2>
-              <p className="section-desc" style={{ marginBottom: 0 }}>
-                Transparent grassroots projects with measurable outcomes.
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', backgroundColor: '#dcfce7', color: '#166534', padding: '0.4rem 0.9rem', borderRadius: '999px', fontSize: '0.85rem', fontWeight: 700, marginBottom: '1rem' }}>
+                <Sparkles size={16} />
+                <span>Launched on 15 August 2022 (75 Years of Independence)</span>
+              </div>
+              <h2 style={{ fontSize: '2.2rem', color: '#14532d', marginBottom: '1rem', lineHeight: '1.25' }}>
+                Mission Sustainable India
+              </h2>
+              <p style={{ fontSize: '1.05rem', lineHeight: '1.8', color: '#166534', marginBottom: '1.5rem' }}>
+                An initiative by volunteers across India co-working on 13 domains of sustainability (Food, Water, Air, Energy, Waste, Livelihood, Governance, and Justice). Anchored on the 5P principle—<strong>Planet, People, Prosperity, Peace &amp; Well being, and Partnership</strong>—sustained through <strong>Political Sustainability (Sustainable Governance)</strong>.
               </p>
+              <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+                <Link to="/about">
+                  <Button variant="primary" size="md">
+                    Read the 5P Vision Document
+                  </Button>
+                </Link>
+                <Link to="/donate">
+                  <Button variant="outline" size="md">
+                    Support the Mission
+                  </Button>
+                </Link>
+              </div>
             </div>
-            <Link to="/projects">
-              <Button variant="outline" icon={ArrowRight}>
-                View All Projects
-              </Button>
-            </Link>
+
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ display: 'inline-block', padding: '1.25rem', backgroundColor: 'white', borderRadius: '20px', boxShadow: 'var(--shadow-md)', border: '2px solid #86efac' }}>
+                <img
+                  src="/mission_sustainable_india.jpg"
+                  alt="Mission Sustainable India Emblem"
+                  style={{ width: '220px', height: '220px', objectFit: 'contain', display: 'block', margin: '0 auto' }}
+                />
+                <div style={{ marginTop: '0.75rem', fontWeight: 800, color: '#14532d', fontSize: '1.05rem' }}>
+                  लक्ष्य — शाश्वत भारत
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 5. FEATURED PROJECTS LOADED DIRECTLY FROM DATABASE */}
+      <section className="section">
+        <div className="container">
+          <div className="section-title-wrap">
+            <span className="section-badge">Live Initiatives</span>
+            <h2 className="section-title">Community Campaigns</h2>
+            <p className="section-desc">
+              All contributions are stored securely in database, verified via payment webhooks, and backed by Section 80G tax receipts.
+            </p>
           </div>
 
           {loading ? (
@@ -320,44 +366,58 @@ export default function HomePage() {
               ))}
             </div>
           )}
+
+          <div style={{ textAlign: 'center', marginTop: '3rem' }}>
+            <Link to="/projects">
+              <Button variant="outline" size="lg" icon={ArrowRight}>
+                View All Ongoing Projects
+              </Button>
+            </Link>
+          </div>
         </div>
       </section>
 
-      {/* 5. CALL TO ACTION BANNER */}
-      <section className="section">
+      {/* 6. STATUTORY CREDENTIALS & CALL TO ACTION */}
+      <section className="section" style={{ paddingTop: 0 }}>
         <div className="container">
           <div
             style={{
-              background: 'linear-gradient(135deg, var(--color-primary-800) 0%, var(--color-teal-700) 100%)',
+              background: 'linear-gradient(135deg, var(--color-primary-900) 0%, var(--color-teal-800) 100%)',
               borderRadius: 'var(--border-radius-xl)',
-              padding: '4rem 3rem',
+              padding: '3.5rem 3rem',
               color: 'var(--color-white)',
               textAlign: 'center',
               boxShadow: 'var(--shadow-xl)',
             }}
           >
-            <h2 style={{ color: 'var(--color-white)', marginBottom: '1rem' }}>
-              Your Contribution Creates Generational Change
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', backgroundColor: 'rgba(255, 255, 255, 0.15)', padding: '0.4rem 1rem', borderRadius: '999px', fontSize: '0.85rem', fontWeight: 600, color: '#fef08a', marginBottom: '1.25rem' }}>
+              <ShieldCheck size={18} />
+              <span>Section 80G Tax Exemption Certified Non-Profit</span>
+            </div>
+
+            <h2 style={{ color: 'var(--color-white)', fontSize: '2rem', marginBottom: '1rem' }}>
+              Support Saraswati Educational &amp; Charitable Trust
             </h2>
             <p
               style={{
-                maxWidth: '620px',
-                margin: '0 auto 2.5rem',
+                maxWidth: '640px',
+                margin: '0 auto 2.25rem',
                 color: 'rgba(255, 255, 255, 0.9)',
-                fontSize: '1.15rem',
+                fontSize: '1.1rem',
+                lineHeight: 1.7,
               }}
             >
-              Every rupee donated to Saraswati Educational & Charitable Trust is backed by 100% financial transparency, rigorous audit reports, and official 80G tax receipts.
+              Whether contributing through online donation, UPI, or volunteer participation, every rupee creates generational change with 100% financial transparency.
             </p>
             <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap' }}>
               <Link to="/donate">
                 <Button variant="amber" size="lg" icon={Heart}>
-                  Donate With 80G Tax Benefit
+                  Donate with 80G Tax Benefit
                 </Button>
               </Link>
               <Link to="/contact">
                 <Button variant="outline-white" size="lg">
-                  Partner With SECT
+                  Contact Trust Secretariat
                 </Button>
               </Link>
             </div>
