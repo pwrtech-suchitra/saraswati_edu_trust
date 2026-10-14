@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShieldCheck, Award, Target, Eye, Users, FileText, CheckCircle2 } from 'lucide-react';
+import { ShieldCheck, Award, Target, Eye, FileText } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Button from '../../components/common/Button';
 

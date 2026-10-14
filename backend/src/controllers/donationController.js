@@ -16,6 +16,7 @@ async function createOrder(req, res, next) {
 
     return ApiResponse.created(res, 'Donation order created', {
       donation_id: donation.id,
+      donationId: donation.id,
       ...orderData
     });
   } catch (err) {

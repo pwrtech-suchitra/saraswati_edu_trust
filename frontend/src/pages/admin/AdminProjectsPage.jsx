@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Plus, Edit2, Trash2 } from 'lucide-react';
 import { projectApi } from '../../api/projectApi';
 import { formatINR, calculateProgress } from '../../utils/formatters';
 import { Spinner } from '../../components/common/Loader';
@@ -25,25 +25,29 @@ export default function AdminProjectsPage() {
     imageUrl: '',
   });
 
-  const loadData = async () => {
-    setLoading(true);
-    try {
-      const [projRes, catRes] = await Promise.all([
+  useEffect(() => {
+    let cancelled = false;
+
+    Promise.all([
         projectApi.listProjects(),
         projectApi.listCategories(),
-      ]);
-      if (projRes.success) setProjects(projRes.data || []);
-      if (catRes.success) setCategories(catRes.data || []);
-    } catch (err) {
-      showError('Failed to load project records');
-    } finally {
-      setLoading(false);
-    }
-  };
+      ])
+      .then(([projRes, catRes]) => {
+        if (cancelled) return;
+        if (projRes.success) setProjects(projRes.data || []);
+        if (catRes.success) setCategories(catRes.data || []);
+      })
+      .catch(() => {
+        if (!cancelled) showError('Failed to load project records');
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
 
-  useEffect(() => {
-    loadData();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    return () => {
+      cancelled = true;
+    };
+  }, [showError]);
 
   const handleOpenCreate = () => {
     setEditingId(null);

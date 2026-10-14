@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { ShieldCheck, FileCheck, CheckCircle2, HelpCircle } from 'lucide-react';
+import { ShieldCheck, CheckCircle2, HelpCircle } from 'lucide-react';
 import { projectApi } from '../../api/projectApi';
 import DonationForm from '../../components/donation/DonationForm';
 import { Spinner } from '../../components/common/Loader';

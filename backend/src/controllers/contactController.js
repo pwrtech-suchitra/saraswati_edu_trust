@@ -76,8 +76,26 @@ async function listInquiries(req, res, next) {
   }
 }
 
+async function updateInquiryStatus(req, res, next) {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+    const result = await db.query(
+      'UPDATE inquiries SET status = $1 WHERE id = $2 RETURNING *',
+      [status, id]
+    );
+    if (result.rowCount === 0) {
+      return ApiResponse.error(res, 'Inquiry not found', [], 404);
+    }
+    return ApiResponse.success(res, 'Inquiry status updated', result.rows[0]);
+  } catch (err) {
+    next(err);
+  }
+}
+
 module.exports = {
   submitInquiry,
   submitVolunteerApplication,
-  listInquiries
+  listInquiries,
+  updateInquiryStatus
 };

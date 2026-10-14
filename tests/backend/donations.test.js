@@ -40,6 +40,23 @@ test('createDonationOrderSchema rejects invalid PAN format', () => {
   assert.strictEqual(parsed.success, false);
 });
 
+test('createDonationOrderSchema validates camelCase inputs from frontend', () => {
+  const camelDonation = {
+    amount: 2500,
+    donorName: 'Priyanka Sen',
+    donorEmail: 'priyanka@example.com',
+    donorPan: 'ABCDE5678G',
+    donorAddress: 'Cuttack, Odisha',
+    require80G: true
+  };
+
+  const parsed = createDonationOrderSchema.safeParse(camelDonation);
+  assert.strictEqual(parsed.success, true);
+  assert.strictEqual(parsed.data.donor_name, 'Priyanka Sen');
+  assert.strictEqual(parsed.data.donor_email, 'priyanka@example.com');
+  assert.strictEqual(parsed.data.is_80g_claimed, true);
+});
+
 test('buildReceiptData constructs complete 80G certificate record', () => {
   const donation = {
     donor_name: 'Subhashree Roy',

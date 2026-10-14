@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { User, Mail, Shield, Heart, FileText, Download, Calendar } from 'lucide-react';
+import { Mail, Heart, Download } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { donationApi } from '../../api/donationApi';
 import { formatINR, formatDate } from '../../utils/formatters';

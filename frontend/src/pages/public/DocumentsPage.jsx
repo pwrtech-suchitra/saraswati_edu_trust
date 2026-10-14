@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FileText, Download, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import { FileText, Download, ShieldCheck } from 'lucide-react';
 import { contentApi } from '../../api/contentApi';
 import { Spinner } from '../../components/common/Loader';
 import Button from '../../components/common/Button';

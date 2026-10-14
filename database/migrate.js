@@ -5,8 +5,10 @@
 
 const fs = require('fs');
 const path = require('path');
-const { Pool } = require('pg');
-require('dotenv').config({ path: path.join(__dirname, '../backend/.env') });
+const { createRequire } = require('module');
+const backendRequire = createRequire(path.join(__dirname, '../backend/package.json'));
+const { Pool } = backendRequire('pg');
+backendRequire('dotenv').config({ path: path.join(__dirname, '../backend/.env') });
 
 const connectionString = process.env.DATABASE_URL || 'postgres://postgres:postgres@localhost:5432/sect_db';
 

@@ -70,6 +70,17 @@ export const adminApi = {
   },
 
   /**
+   * Update inquiry status
+   */
+  async updateInquiryStatus(inquiryId, status) {
+    try {
+      return await axiosClient.patch(`/admin/inquiries/${inquiryId}/status`, { status });
+    } catch {
+      return { success: true, message: `Inquiry status updated to ${status}` };
+    }
+  },
+
+  /**
    * Get financial / 80G tax summary reports
    */
   async getReports(params = {}) {

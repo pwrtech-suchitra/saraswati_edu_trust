@@ -7,10 +7,7 @@ import {
   Sparkles,
   TreePine,
   ShieldCheck,
-  ArrowRight,
-  TrendingUp,
-  Award,
-  BookOpen
+  ArrowRight
 } from 'lucide-react';
 import { projectApi } from '../../api/projectApi';
 import ProjectCard from '../../components/cards/ProjectCard';

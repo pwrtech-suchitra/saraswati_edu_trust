@@ -3,15 +3,35 @@ import { useState, useEffect, useCallback } from 'react';
 /**
  * Custom hook for data fetching with loading, error, and refetch states
  * @param {Function} fetchFn Async function that returns data
- * @param {Array} deps Dependency array
  * @param {any} initialData Initial data fallback
  */
-export function useFetch(fetchFn, deps = [], initialData = null) {
+export function useFetch(fetchFn, initialData = null) {
   const [data, setData] = useState(initialData);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const execute = useCallback(async () => {
+  useEffect(() => {
+    let cancelled = false;
+
+    fetchFn()
+      .then((result) => {
+        if (cancelled) return;
+        setError(null);
+        setData(result?.data ?? result);
+      })
+      .catch((err) => {
+        if (!cancelled) setError(err?.message || 'Failed to load content');
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [fetchFn]);
+
+  const refetch = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -22,11 +42,7 @@ export function useFetch(fetchFn, deps = [], initialData = null) {
     } finally {
       setLoading(false);
     }
-  }, deps); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [fetchFn]);
 
-  useEffect(() => {
-    execute();
-  }, [execute]);
-
-  return { data, loading, error, refetch: execute };
+  return { data, loading, error, refetch };
 }

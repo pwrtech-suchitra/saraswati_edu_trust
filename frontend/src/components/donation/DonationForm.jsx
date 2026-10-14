@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Heart, ShieldCheck, CreditCard, Sparkles, CheckCircle2 } from 'lucide-react';
+import { Heart, ShieldCheck, CreditCard } from 'lucide-react';
 import { donationApi } from '../../api/donationApi';
 import { isValidEmail, isValidIndianPhone, isValidPAN } from '../../utils/validators';
 import { formatINR } from '../../utils/formatters';
 import { useNotification } from '../../hooks/useNotification';
 import Button from '../common/Button';
 import Input from '../common/Input';
-import Alert from '../common/Alert';
+
 
 export default function DonationForm({ projects = [], selectedProjectId = '' }) {
   const navigate = useNavigate();

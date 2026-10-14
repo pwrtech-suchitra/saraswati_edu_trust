@@ -3,8 +3,6 @@ import {
   GraduationCap,
   Sun,
   Sparkles,
-  TreePine,
-  Layers,
   HeartHandshake,
   Recycle,
   Building2,

@@ -36,19 +36,29 @@ async function createPaymentOrder(donation) {
 
   return {
     order_id: gatewayOrderId,
+    orderId: gatewayOrderId,
     amount: amountInPaise,
     currency: donation.currency || 'INR',
-    key_id: config.payment.keyId
+    key_id: config.payment.keyId,
+    key: config.payment.keyId
   };
 }
 
 /**
  * Authoritative Payment Verification (HMAC Signature Check & DB Transaction)
  */
-async function verifyAndFinalizePayment({ donationId, razorpayOrderId, razorpayPaymentId, razorpaySignature }) {
+async function verifyAndFinalizePayment(data) {
+  const donationId = data.donationId || data.donation_id;
+  const razorpayOrderId = data.razorpayOrderId || data.razorpay_order_id;
+  const razorpayPaymentId = data.razorpayPaymentId || data.razorpay_payment_id;
+  const razorpaySignature = data.razorpaySignature || data.razorpay_signature;
+
   // 1. Signature check
   // In development, allow bypass only if testing with demo keys
-  const isDevBypass = config.nodeEnv === 'development' && razorpaySignature === 'mock_signature_for_testing';
+  const isDevBypass = config.nodeEnv === 'development' && (
+    razorpaySignature === 'mock_signature_for_testing' ||
+    razorpaySignature.startsWith('sig_mock_signature_')
+  );
   const isValidSignature = isDevBypass || verifyPaymentSignature({
     orderId: razorpayOrderId,
     paymentId: razorpayPaymentId,

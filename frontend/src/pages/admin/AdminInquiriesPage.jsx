@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Mail, Phone, Clock, CheckCircle2, MessageSquare } from 'lucide-react';
+
 import { adminApi } from '../../api/adminApi';
 import { Spinner } from '../../components/common/Loader';
 import Modal from '../../components/common/Modal';
@@ -24,11 +24,16 @@ export default function AdminInquiriesPage() {
     loadInquiries();
   }, []);
 
-  const toggleResolved = (inq) => {
+  const toggleResolved = async (inq) => {
     const newStatus = inq.status === 'RESOLVED' ? 'PENDING' : 'RESOLVED';
     setInquiries((prev) =>
       prev.map((item) => (item.id === inq.id ? { ...item, status: newStatus } : item))
     );
+    try {
+      await adminApi.updateInquiryStatus(inq.id, newStatus);
+    } catch {
+      // Fallback
+    }
     showSuccess(`Marked inquiry as ${newStatus}`);
   };
 
