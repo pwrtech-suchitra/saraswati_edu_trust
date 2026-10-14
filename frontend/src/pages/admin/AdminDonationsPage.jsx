@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Download, Search, Filter, ShieldCheck, CheckCircle2, Clock, XCircle } from 'lucide-react';
+import { Download, Search } from 'lucide-react';
 import { adminApi } from '../../api/adminApi';
 import { formatINR, formatDate } from '../../utils/formatters';
 import { Spinner } from '../../components/common/Loader';

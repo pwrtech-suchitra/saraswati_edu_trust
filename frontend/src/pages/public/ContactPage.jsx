@@ -6,7 +6,6 @@ import { isValidEmail, isValidIndianPhone } from '../../utils/validators';
 import { useNotification } from '../../hooks/useNotification';
 import Input from '../../components/common/Input';
 import Button from '../../components/common/Button';
-
 export default function ContactPage() {
   const { showSuccess, showError } = useNotification();
   const [trustProfile, setTrustProfile] = useState(null);

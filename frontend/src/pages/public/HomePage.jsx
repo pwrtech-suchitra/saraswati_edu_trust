@@ -9,8 +9,6 @@ import {
   ShieldCheck,
   ArrowRight,
   Sparkles,
-  QrCode,
-  Building2
 } from 'lucide-react';
 import { projectApi } from '../../api/projectApi';
 import { trustProfileApi } from '../../api/trustProfileApi';

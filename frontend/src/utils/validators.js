@@ -22,7 +22,7 @@ export function isValidIndianPhone(phone) {
   if (!phone) return false;
   const cleanPhone = String(phone).replace(/[\s\-+]/g, '');
   // Matches 10 digits starting with 6, 7, 8, or 9 (optionally with 91 or 0 prefix)
-  const phoneRegex = /^(?:(?:\+|0{0,2})91(\s*[\-]\s*)?|[0]?)?[6789]\d{9}$/;
+  const phoneRegex = /^(?:(?:\+|0{0,2})91(\s*[-]\s*)?|[0]?)?[6789]\d{9}$/;
   return phoneRegex.test(cleanPhone);
 }
 

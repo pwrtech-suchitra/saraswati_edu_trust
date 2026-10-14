@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useId } from 'react';
 import { AlertCircle } from 'lucide-react';
 
 export default function Input({
@@ -12,7 +12,8 @@ export default function Input({
   icon: Icon = null,
   ...props
 }) {
-  const inputId = id || props.name || Math.random().toString(36).substring(7);
+  const generatedId = useId();
+  const inputId = id || props.name || generatedId;
 
   return (
     <div className={`form-group ${className}`.trim()}>

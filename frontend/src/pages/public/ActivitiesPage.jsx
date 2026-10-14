@@ -5,9 +5,7 @@ import {
   Sprout,
   Users,
   CheckCircle2,
-  ArrowRight,
   Sun,
-  ShieldCheck
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Button from '../../components/common/Button';

@@ -16,8 +16,10 @@ router.use(authenticate, requireRole(ROLES.ADMIN));
 
 router.get('/stats', adminController.getDashboardStats);
 router.get('/users', adminController.listUsers);
+router.patch('/users/:id/role', adminController.updateUserRole);
+router.put('/users/:id/role', adminController.updateUserRole);
 router.get('/inquiries', contactController.listInquiries);
-router.put('/inquiries/:id/status', contactController.updateInquiryStatus);
 router.patch('/inquiries/:id/status', contactController.updateInquiryStatus);
+router.put('/inquiries/:id/status', contactController.updateInquiryStatus);
 
 module.exports = router;

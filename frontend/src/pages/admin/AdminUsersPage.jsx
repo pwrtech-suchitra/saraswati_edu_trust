@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Shield, UserCheck, AlertCircle } from 'lucide-react';
+
 import { adminApi } from '../../api/adminApi';
 import { Spinner } from '../../components/common/Loader';
 import { useNotification } from '../../hooks/useNotification';

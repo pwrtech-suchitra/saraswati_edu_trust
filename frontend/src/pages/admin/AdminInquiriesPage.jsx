@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Mail, Phone, Clock, CheckCircle2, MessageSquare } from 'lucide-react';
+
 import { adminApi } from '../../api/adminApi';
 import { Spinner } from '../../components/common/Loader';
 import Modal from '../../components/common/Modal';
@@ -7,7 +7,7 @@ import Button from '../../components/common/Button';
 import { useNotification } from '../../hooks/useNotification';
 
 export default function AdminInquiriesPage() {
-  const { showSuccess } = useNotification();
+  const { showSuccess, showError } = useNotification();
   const [inquiries, setInquiries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeInquiry, setActiveInquiry] = useState(null);
@@ -24,12 +24,21 @@ export default function AdminInquiriesPage() {
     loadInquiries();
   }, []);
 
-  const toggleResolved = (inq) => {
+  const toggleResolved = async (inq) => {
     const newStatus = inq.status === 'RESOLVED' ? 'PENDING' : 'RESOLVED';
+    const previousStatus = inq.status;
     setInquiries((prev) =>
       prev.map((item) => (item.id === inq.id ? { ...item, status: newStatus } : item))
     );
-    showSuccess(`Marked inquiry as ${newStatus}`);
+    try {
+      await adminApi.updateInquiryStatus(inq.id, { status: newStatus });
+      showSuccess(`Marked inquiry as ${newStatus}`);
+    } catch (err) {
+      setInquiries((prev) =>
+        prev.map((item) => (item.id === inq.id ? { ...item, status: previousStatus } : item))
+      );
+      showError(err.message || 'Failed to update inquiry status.');
+    }
   };
 
   return (

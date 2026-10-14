@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FileBarChart, Download, FileText, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import { Download, FileText, ShieldCheck } from 'lucide-react';
 import { adminApi } from '../../api/adminApi';
 import { formatINR } from '../../utils/formatters';
 import { Spinner } from '../../components/common/Loader';
