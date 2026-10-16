@@ -69,7 +69,7 @@ INSERT INTO media_files (
 (
     'Solar Rooftop Electrification at Tribal High School',
     'IMAGE',
-    'https://images.unsplash.com/photo-1509391365360-2e959784a276?auto=format&fit=crop&w=800&q=80',
+    'https://thumbs.dreamstime.com/b/group-students-community-members-gathers-outside-school-solar-panels-its-roof-sustainable-finance-project-349517027.jpg',
     'Renewable Energy',
     'Engineers installing off-grid 3kW solar systems to ensure uninterrupted study hours.'
 ),

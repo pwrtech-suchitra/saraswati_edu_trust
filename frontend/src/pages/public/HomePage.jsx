@@ -46,7 +46,7 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div>
+    <div style={{ backgroundColor: 'var(--color-white)' }}>
       {/* 1. HERO SECTION */}
       <section className="home-hero">
         <img
@@ -54,64 +54,69 @@ export default function HomePage() {
           alt="SECT community and sustainability initiative"
           className="home-hero-image"
         />
+      </section>
 
-        <div className="home-hero-overlay" />
-
-        <div className="container home-hero-content">
-          <div className="home-hero-inner">
+      {/* 2. HOMEPAGE INTRODUCTION */}
+      <section style={{ position: 'relative', zIndex: 1, marginTop: '-2.5rem', marginBottom: '2rem' }}>
+        <div className="container">
+          <div
+            style={{
+              backgroundColor: 'var(--color-white)',
+              border: '1px solid var(--color-slate-200)',
+              borderTop: '4px solid var(--color-primary-600)',
+              borderRadius: 'var(--border-radius-xl)',
+              boxShadow: 'var(--shadow-lg)',
+              padding: '2.5rem',
+              textAlign: 'center',
+            }}
+          >
             <div
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '0.5rem',
-                backgroundColor: 'rgba(255, 255, 255, 0.15)',
-                backdropFilter: 'blur(6px)',
-                padding: '0.45rem 1rem',
+                backgroundColor: 'var(--color-primary-50)',
+                color: 'var(--color-primary-700)',
+                padding: '0.4rem 0.9rem',
                 borderRadius: '999px',
                 fontSize: '0.85rem',
-                fontWeight: 600,
-                color: '#fef08a',
-                marginBottom: '1.25rem',
-                border: '1px solid rgba(255,255,255,0.2)',
+                fontWeight: 700,
+                marginBottom: '1rem',
               }}
             >
               <ShieldCheck size={16} />
               <span>Saraswati Educational &amp; Charitable Trust • Registered NGO</span>
             </div>
-
             <h1
               style={{
-                color: 'white',
-                fontSize: 'clamp(2.2rem, 5vw, 3.4rem)',
+                color: 'var(--color-slate-900)',
+                fontSize: 'clamp(2rem, 4vw, 3rem)',
                 fontWeight: 800,
-                lineHeight: 1.15,
-                marginBottom: '1.25rem',
-                letterSpacing: '-0.5px',
+                lineHeight: 1.2,
+                marginBottom: '1rem',
               }}
             >
               Empowering Rural &amp; Tribal Communities Through Renewable Energy &amp; Sustainable Governance
             </h1>
-
             <p
               style={{
-                fontSize: '1.18rem',
-                color: 'rgba(255, 255, 255, 0.92)',
-                maxWidth: '720px',
+                color: 'var(--color-slate-700)',
+                fontSize: '1.1rem',
                 lineHeight: 1.7,
-                marginBottom: '2.25rem',
+                maxWidth: '800px',
+                margin: '0 auto 1.75rem',
               }}
             >
               A committed NGO active in community capacity building, clean solar electrification, mobile livestock care, organic dairy training, and Mission Sustainable India.
             </p>
-
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', alignItems: 'center' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: '1rem', alignItems: 'center' }}>
               <Link to="/donate">
                 <Button variant="amber" size="lg" icon={Heart}>
                   Donate with 80G Tax Benefit
                 </Button>
               </Link>
               <Link to="/projects">
-                <Button variant="outline-white" size="lg" icon={ArrowRight}>
+                <Button variant="primary" size="lg" icon={ArrowRight}>
                   Explore Community Projects
                 </Button>
               </Link>
@@ -120,8 +125,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 2. IMPACT COUNTER BAR */}
-      <section style={{ transform: 'translateY(-2.5rem)', marginBottom: '-1rem' }}>
+      {/* 3. IMPACT COUNTER BAR */}
+      <section>
         <div className="container">
           <div
             style={{
@@ -178,7 +183,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 3. FOUR CORE ACTIVITY PILLARS (AS PER OFFICIAL PDF) */}
+      {/* 4. FOUR CORE ACTIVITY PILLARS (AS PER OFFICIAL PDF) */}
       <section className="section">
         <div className="container">
           <div className="section-title-wrap">
@@ -297,7 +302,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 4. MISSION SUSTAINABLE INDIA SPOTLIGHT BANNER */}
+      {/* 5. MISSION SUSTAINABLE INDIA SPOTLIGHT BANNER */}
       <section className="section" style={{ backgroundColor: '#f0fdf4', borderTop: '1px solid #bbf7d0', borderBottom: '1px solid #bbf7d0' }}>
         <div className="container">
           <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.4fr) minmax(0, 0.8fr)', gap: '3rem', alignItems: 'center' }}>
@@ -342,7 +347,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 5. FEATURED PROJECTS LOADED DIRECTLY FROM DATABASE */}
+      {/* 6. FEATURED PROJECTS LOADED DIRECTLY FROM DATABASE */}
       <section className="section">
         <div className="container">
           <div className="section-title-wrap">
@@ -377,32 +382,33 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 6. STATUTORY CREDENTIALS & CALL TO ACTION */}
+      {/* 7. STATUTORY CREDENTIALS & CALL TO ACTION */}
       <section className="section" style={{ paddingTop: 0 }}>
         <div className="container">
           <div
             style={{
-              background: 'linear-gradient(135deg, var(--color-primary-900) 0%, var(--color-teal-800) 100%)',
+              background: 'var(--color-white)',
               borderRadius: 'var(--border-radius-xl)',
               padding: '3.5rem 3rem',
-              color: 'var(--color-white)',
+              color: 'var(--color-slate-900)',
               textAlign: 'center',
               boxShadow: 'var(--shadow-xl)',
+              border: '1px solid var(--color-slate-200)',
             }}
           >
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', backgroundColor: 'rgba(255, 255, 255, 0.15)', padding: '0.4rem 1rem', borderRadius: '999px', fontSize: '0.85rem', fontWeight: 600, color: '#fef08a', marginBottom: '1.25rem' }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', backgroundColor: 'var(--color-primary-50)', padding: '0.4rem 1rem', borderRadius: '999px', fontSize: '0.85rem', fontWeight: 600, color: 'var(--color-primary-900)', marginBottom: '1.25rem' }}>
               <ShieldCheck size={18} />
               <span>Section 80G Tax Exemption Certified Non-Profit</span>
             </div>
 
-            <h2 style={{ color: 'var(--color-white)', fontSize: '2rem', marginBottom: '1rem' }}>
+            <h2 style={{ color: 'var(--color-slate-900)', fontSize: '2rem', marginBottom: '1rem' }}>
               Support Saraswati Educational &amp; Charitable Trust
             </h2>
             <p
               style={{
                 maxWidth: '640px',
                 margin: '0 auto 2.25rem',
-                color: 'rgba(255, 255, 255, 0.9)',
+                color: 'var(--color-slate-700)',
                 fontSize: '1.1rem',
                 lineHeight: 1.7,
               }}
@@ -416,7 +422,7 @@ export default function HomePage() {
                 </Button>
               </Link>
               <Link to="/contact">
-                <Button variant="outline-white" size="lg">
+                <Button variant="outline" size="lg">
                   Contact Trust Secretariat
                 </Button>
               </Link>

@@ -30,7 +30,7 @@ INSERT INTO projects (
     '12,000+ Students across 50 remote tribal schools',
     'Mayurbhanj & Keonjhar Districts, Odisha',
     'ACTIVE',
-    'https://images.unsplash.com/photo-1509391365360-2e959784a276?auto=format&fit=crop&w=800&q=80',
+    'https://thumbs.dreamstime.com/b/group-students-community-members-gathers-outside-school-solar-panels-its-roof-sustainable-finance-project-349517027.jpg',
     TRUE
 ),
 (

@@ -4,6 +4,8 @@ import { Heart, Users, Target } from 'lucide-react';
 import { formatINR, calculateProgress } from '../../utils/formatters';
 import Button from '../common/Button';
 
+const defaultProjectImage = 'https://thumbs.dreamstime.com/b/group-students-community-members-gathers-outside-school-solar-panels-its-roof-sustainable-finance-project-349517027.jpg';
+
 export default function ProjectCard({ project }) {
   const progress = calculateProgress(project.raisedAmount, project.targetAmount);
 
@@ -12,7 +14,7 @@ export default function ProjectCard({ project }) {
       {/* Project Image */}
       <div style={{ position: 'relative', height: '210px', overflow: 'hidden' }}>
         <img
-          src={project.imageUrl || 'https://images.unsplash.com/photo-1509391365360-2e959784a276?auto=format&fit=crop&w=800&q=80'}
+          src={project.imageUrl || defaultProjectImage}
           alt={project.title}
           style={{ width: '100%', height: '100%', objectFit: 'cover' }}
         />
