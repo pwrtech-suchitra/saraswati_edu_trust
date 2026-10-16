@@ -109,7 +109,7 @@ export default function AdminProjectsPage() {
           description: formData.shortDescription,
           target_amount: Number(formData.targetAmount),
           category_id: formData.categoryId ? Number(formData.categoryId) : 1,
-          hero_image_url: formData.imageUrl || 'https://images.unsplash.com/photo-1509391365360-2e959784a276?auto=format&fit=crop&w=800&q=80',
+          hero_image_url: formData.imageUrl || 'https://thumbs.dreamstime.com/b/group-students-community-members-gathers-outside-school-solar-panels-its-roof-sustainable-finance-project-349517027.jpg',
           location: 'Odisha'
         });
         showSuccess('New initiative created successfully in database');

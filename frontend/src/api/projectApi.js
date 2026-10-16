@@ -1,7 +1,11 @@
 import axiosClient from './axiosClient';
 
+const defaultProjectImage = 'https://thumbs.dreamstime.com/b/group-students-community-members-gathers-outside-school-solar-panels-its-roof-sustainable-finance-project-349517027.jpg';
+const replacedProjectImage = 'https://images.unsplash.com/photo-1509391365360-2e959784a276?auto=format&fit=crop&w=800&q=80';
+
 function normalizeProject(p) {
   if (!p) return null;
+  const projectImage = p.imageUrl || p.hero_image_url;
   return {
     ...p,
     id: p.id,
@@ -11,7 +15,7 @@ function normalizeProject(p) {
     description: p.description || p.summary || '',
     raisedAmount: Number(p.raisedAmount || p.raised_amount || 0),
     targetAmount: Number(p.targetAmount || p.target_amount || 0),
-    imageUrl: p.imageUrl || p.hero_image_url || 'https://images.unsplash.com/photo-1509391365360-2e959784a276?auto=format&fit=crop&w=800&q=80',
+    imageUrl: !projectImage || projectImage === replacedProjectImage ? defaultProjectImage : projectImage,
     category: p.category || p.category_name || 'General',
     categoryId: p.categoryId || p.category_id || '',
     donorCount: p.donorCount || 0,
