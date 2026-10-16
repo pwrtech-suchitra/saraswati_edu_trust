@@ -1,5 +1,5 @@
 import React from 'react';
-import { Calendar, Clock, MapPin, Users } from 'lucide-react';
+import { Calendar, Clock, MapPin } from 'lucide-react';
 import { formatDate } from '../../utils/formatters';
 import Button from '../common/Button';
 

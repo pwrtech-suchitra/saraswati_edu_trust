@@ -5,10 +5,7 @@ import {
   FolderKanban,
   MessageSquareText,
   PlusCircle,
-  FileDown,
-  ShieldCheck,
-  CheckCircle2,
-  Clock
+  FileDown
 } from 'lucide-react';
 import { adminApi } from '../../api/adminApi';
 import { formatINR, formatDate } from '../../utils/formatters';

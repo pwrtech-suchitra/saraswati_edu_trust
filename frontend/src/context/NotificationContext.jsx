@@ -1,7 +1,6 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { CheckCircle2, AlertCircle, Info, X } from 'lucide-react';
-
-const NotificationContext = createContext(null);
+import { NotificationContext } from './NotificationContextValue';
 
 export function NotificationProvider({ children }) {
   const [toasts, setToasts] = useState([]);
@@ -78,12 +77,4 @@ export function NotificationProvider({ children }) {
       </div>
     </NotificationContext.Provider>
   );
-}
-
-export function useNotification() {
-  const context = useContext(NotificationContext);
-  if (!context) {
-    throw new Error('useNotification must be used within NotificationProvider');
-  }
-  return context;
 }

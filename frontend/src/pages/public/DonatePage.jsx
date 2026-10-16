@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { ShieldCheck, CheckCircle2, HelpCircle, Building2, QrCode } from 'lucide-react';
+import { ShieldCheck, CheckCircle2, Building2, QrCode } from 'lucide-react';
 import { projectApi } from '../../api/projectApi';
 import { trustProfileApi } from '../../api/trustProfileApi';
 import DonationForm from '../../components/donation/DonationForm';

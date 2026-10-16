@@ -1,0 +1,17 @@
+{
+  "name": "sect-root",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Saraswati Educational & Charitable Trust (SECT) Web Application",
+  "scripts": {
+    "test": "node --test tests/backend/*.test.js",
+    "test:backend": "npm --prefix backend test",
+    "dev:backend": "npm --prefix backend run dev",
+    "start:backend": "npm --prefix backend start",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "build:frontend": "npm --prefix frontend run build",
+    "lint:frontend": "npm --prefix frontend run lint",
+    "migrate": "node database/migrate.js",
+    "migrate:seed": "node database/migrate.js --seed"
+  }
+}

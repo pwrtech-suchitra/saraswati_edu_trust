@@ -4,7 +4,6 @@ import {
   Heart,
   ArrowLeft,
   Users,
-  Target,
   Calendar,
   ShieldCheck,
   Share2,

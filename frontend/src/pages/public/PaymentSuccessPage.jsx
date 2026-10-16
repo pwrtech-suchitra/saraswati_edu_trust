@@ -1,15 +1,17 @@
 import React, { useEffect } from 'react';
 import { useLocation, Link } from 'react-router-dom';
-import { CheckCircle2, Printer, ArrowLeft, ShieldCheck, Download, Heart } from 'lucide-react';
+import { CheckCircle2, Printer, ArrowLeft, ShieldCheck } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { formatINR, formatDate } from '../../utils/formatters';
 import Button from '../../components/common/Button';
 
 export default function PaymentSuccessPage() {
   const location = useLocation();
-  const { receipt, donor, amount } = location.state || {};
+  const { receipt } = location.state || {};
 
   useEffect(() => {
+    if (!receipt) return;
+
     // Launch celebratory confetti burst
     try {
       confetti({
@@ -21,18 +23,23 @@ export default function PaymentSuccessPage() {
     } catch {
       // safe fallback
     }
-  }, []);
+  }, [receipt]);
 
-  const receiptData = receipt || {
-    receiptNumber: 'SECT-80G-' + Math.floor(100000 + Math.random() * 900000),
-    donationId: 'DON-DEMO-' + Date.now().toString().slice(-4),
-    status: 'COMPLETED',
-    amount: amount || 2500,
-    donorName: donor?.name || 'Generous Patron',
-    panNumber: donor?.pan || 'ABCDE1234F',
-    date: new Date().toISOString(),
-    trustRegistration: 'TRUST/OD/2018/80G/9941',
-  };
+  if (!receipt) {
+    return (
+      <div className="section" style={{ backgroundColor: '#f8fafc', minHeight: '80vh' }}>
+        <div className="container" style={{ maxWidth: '720px', textAlign: 'center' }}>
+          <h2>Receipt details unavailable</h2>
+          <p>Your payment confirmation did not include receipt details. Please contact the trust before claiming a tax deduction.</p>
+          <Link to="/donate">
+            <Button variant="primary">Return to donations</Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const receiptData = receipt;
 
   const handlePrint = () => {
     window.print();

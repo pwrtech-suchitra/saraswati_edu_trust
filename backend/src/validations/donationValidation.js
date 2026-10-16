@@ -8,27 +8,82 @@ const { z } = require('zod');
 const createDonationOrderSchema = z.object({
   amount: z.coerce.number().min(10, 'Minimum donation amount is ₹10'),
   currency: z.string().default('INR'),
-  donor_name: z.string().min(2, 'Donor name is required').max(150),
-  donor_email: z.string().email('Valid donor email is required'),
+  donor_name: z.string().min(2, 'Donor name is required').max(150).optional(),
+  donorName: z.string().min(2, 'Donor name is required').max(150).optional(),
+  donor_email: z.string().email('Valid donor email is required').optional(),
+  donorEmail: z.string().email('Valid donor email is required').optional(),
   donor_phone: z.string().optional().nullable(),
+  donorPhone: z.string().optional().nullable(),
   donor_pan: z
     .string()
     .regex(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, 'Invalid Indian PAN format (e.g. ABCDE1234F)')
     .optional()
     .nullable()
     .or(z.literal('')),
+  donorPan: z
+    .string()
+    .regex(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, 'Invalid Indian PAN format (e.g. ABCDE1234F)')
+    .optional()
+    .nullable()
+    .or(z.literal('')),
   donor_address: z.string().optional().nullable(),
+  donorAddress: z.string().optional().nullable(),
   project_id: z.string().uuid().optional().nullable(),
+  projectId: z.string().uuid().optional().nullable(),
   is_anonymous: z.coerce.boolean().optional().default(false),
-  is_80g_claimed: z.coerce.boolean().optional().default(true)
-});
+  isAnonymous: z.coerce.boolean().optional(),
+  is_80g_claimed: z.coerce.boolean().optional(),
+  require80G: z.coerce.boolean().optional()
+}).refine(data => Boolean(data.donor_name || data.donorName), {
+  message: 'Donor name is required',
+  path: ['donor_name']
+}).refine(data => Boolean(data.donor_email || data.donorEmail), {
+  message: 'Valid donor email is required',
+  path: ['donor_email']
+}).transform(data => ({
+  amount: data.amount,
+  currency: data.currency || 'INR',
+  donor_name: data.donor_name || data.donorName,
+  donor_email: data.donor_email || data.donorEmail,
+  donor_phone: data.donor_phone || data.donorPhone || null,
+  donor_pan: data.donor_pan || data.donorPan || null,
+  donor_address: data.donor_address || data.donorAddress || null,
+  project_id: data.project_id || data.projectId || null,
+  is_anonymous: data.is_anonymous || data.isAnonymous || false,
+  is_80g_claimed: data.is_80g_claimed !== undefined ? data.is_80g_claimed : (data.require80G !== undefined ? data.require80G : true)
+}));
 
 const verifyPaymentSchema = z.object({
-  donation_id: z.string().uuid('Valid donation ID required'),
-  razorpay_order_id: z.string().min(1, 'Order ID is required'),
-  razorpay_payment_id: z.string().min(1, 'Payment ID is required'),
-  razorpay_signature: z.string().min(1, 'Payment signature is required')
-});
+  donation_id: z.string().optional(),
+  donationId: z.string().optional(),
+  razorpay_order_id: z.string().optional(),
+  orderId: z.string().optional(),
+  razorpay_payment_id: z.string().optional(),
+  paymentId: z.string().optional(),
+  razorpay_signature: z.string().optional(),
+  signature: z.string().optional()
+}).refine(data => Boolean(data.donation_id || data.donationId), {
+  message: 'Valid donation ID required',
+  path: ['donation_id']
+}).refine(data => Boolean(data.razorpay_order_id || data.orderId), {
+  message: 'Order ID is required',
+  path: ['razorpay_order_id']
+}).refine(data => Boolean(data.razorpay_payment_id || data.paymentId), {
+  message: 'Payment ID is required',
+  path: ['razorpay_payment_id']
+}).refine(data => Boolean(data.razorpay_signature || data.signature), {
+  message: 'Payment signature is required',
+  path: ['razorpay_signature']
+}).transform(data => ({
+  donation_id: data.donation_id || data.donationId,
+  donationId: data.donation_id || data.donationId,
+  razorpay_order_id: data.razorpay_order_id || data.orderId,
+  razorpayOrderId: data.razorpay_order_id || data.orderId,
+  razorpay_payment_id: data.razorpay_payment_id || data.paymentId,
+  razorpayPaymentId: data.razorpay_payment_id || data.paymentId,
+  razorpay_signature: data.razorpay_signature || data.signature,
+  razorpaySignature: data.razorpay_signature || data.signature
+}));
 
 module.exports = {
   createDonationOrderSchema,

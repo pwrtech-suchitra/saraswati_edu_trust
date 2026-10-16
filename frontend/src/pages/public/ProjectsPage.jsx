@@ -1,11 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Filter, RefreshCw, FolderOpen } from 'lucide-react';
+import { Search, RefreshCw, FolderOpen } from 'lucide-react';
 import { projectApi } from '../../api/projectApi';
 import ProjectCard from '../../components/cards/ProjectCard';
 import { CardSkeleton } from '../../components/common/Loader';
 import EmptyState from '../../components/common/EmptyState';
 import Alert from '../../components/common/Alert';
 import Button from '../../components/common/Button';
+
+function loadProjects(category, search) {
+  return Promise.all([
+    projectApi.listProjects({ category, search }),
+    projectApi.listCategories(),
+  ]);
+}
 
 export default function ProjectsPage() {
   const [projects, setProjects] = useState([]);
@@ -15,14 +22,15 @@ export default function ProjectsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const fetchProjects = async () => {
-    setLoading(true);
+  const fetchProjects = async ({
+    showLoading = true,
+    category = selectedCategory,
+    query = searchQuery,
+  } = {}) => {
+    if (showLoading) setLoading(true);
     setError(null);
     try {
-      const [projRes, catRes] = await Promise.all([
-        projectApi.listProjects({ category: selectedCategory, search: searchQuery }),
-        projectApi.listCategories(),
-      ]);
+      const [projRes, catRes] = await loadProjects(category, query);
 
       if (projRes.success) {
         setProjects(projRes.data || []);
@@ -38,12 +46,39 @@ export default function ProjectsPage() {
   };
 
   useEffect(() => {
-    fetchProjects();
+    let cancelled = false;
+
+    loadProjects(selectedCategory, searchQuery)
+      .then(([projRes, catRes]) => {
+        if (cancelled) return;
+        setError(null);
+        if (projRes.success) setProjects(projRes.data || []);
+        if (catRes.success) setCategories(catRes.data || []);
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          setError(err?.message || 'Failed to load projects. Please try again.');
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [selectedCategory]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     fetchProjects();
+  };
+
+  const handleCategoryChange = (categoryId) => {
+    if (categoryId === selectedCategory) return;
+    setLoading(true);
+    setError(null);
+    setSelectedCategory(categoryId);
   };
 
   return (
@@ -84,7 +119,7 @@ export default function ProjectsPage() {
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
               <button
                 type="button"
-                onClick={() => setSelectedCategory('all')}
+                onClick={() => handleCategoryChange('all')}
                 className={`btn btn-sm ${selectedCategory === 'all' ? 'btn-primary' : 'btn-outline'}`}
               >
                 All Projects
@@ -93,7 +128,7 @@ export default function ProjectsPage() {
                 <button
                   key={cat.id}
                   type="button"
-                  onClick={() => setSelectedCategory(cat.id)}
+                  onClick={() => handleCategoryChange(cat.id)}
                   className={`btn btn-sm ${selectedCategory === cat.id ? 'btn-primary' : 'btn-outline'}`}
                 >
                   {cat.name}
@@ -149,7 +184,11 @@ export default function ProjectsPage() {
               description="There are currently no active projects matching your selected category or search term."
               actionText="Reset All Filters"
               onAction={() => {
-                setSelectedCategory('all');
+                if (selectedCategory !== 'all') {
+                  handleCategoryChange('all');
+                } else {
+                  fetchProjects({ category: 'all', query: '' });
+                }
                 setSearchQuery('');
               }}
             />

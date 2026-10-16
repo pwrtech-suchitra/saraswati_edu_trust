@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ShieldCheck, Award, Target, Eye, Globe2, Sparkles, CheckCircle2, Building, HeartHandshake } from 'lucide-react';
+import { ShieldCheck, Award, Target, Eye, Globe2, Sparkles, CheckCircle2, Building } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Button from '../../components/common/Button';
 import { trustProfileApi } from '../../api/trustProfileApi';

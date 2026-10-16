@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Heart, Users, Target } from 'lucide-react';
+import { Heart, Users } from 'lucide-react';
 import { formatINR, calculateProgress } from '../../utils/formatters';
 import Button from '../common/Button';
 
