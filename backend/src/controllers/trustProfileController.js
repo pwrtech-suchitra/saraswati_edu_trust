@@ -69,9 +69,9 @@ async function updateTrustProfile(req, res, next) {
     const values = [];
 
     const allowedFields = [
-      'trust_name', 'short_name', 'pan', 'registration_no', 'exemption_80g_no',
+      'trust_name', 'short_name', 'pan', 'registration_no',
       'address', 'city', 'state', 'pincode', 'phone_landline', 'phone_mobiles',
-      'email', 'qr_code_url', 'facebook_url', 'twitter_handle', 'linkedin_url',
+      'email', 'facebook_url', 'twitter_handle', 'linkedin_url',
       'whatsapp_numbers', 'introduction', 'vision', 'mission'
     ];
 

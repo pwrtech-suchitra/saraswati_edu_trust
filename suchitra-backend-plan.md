@@ -5,6 +5,8 @@
 **Workspace:** `c:\Users\Suchitra Mishra\Desktop\SECT\`  
 **Reference Documents:** `ANTIGRAVITY_TEAM_RULES.md` & `mrinmayee-frontend-plan.md`  
 
+> **Current donation behavior:** This historical plan's payment, reconciliation, and receipt backend is superseded. The application has no donation/payment APIs or records; migration `012_remove_donation_and_payment_data.sql` removes legacy data.
+
 ---
 
 ## 1. Role Boundary & Mandate Verification

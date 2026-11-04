@@ -12,8 +12,6 @@ const createProjectSchema = z.object({
   description: z.string().min(10).optional(),
   category_id: z.coerce.number().int().positive('Valid category ID is required').optional(),
   categoryId: z.coerce.number().int().positive('Valid category ID is required').optional(),
-  target_amount: z.coerce.number().min(1, 'Target amount must be greater than 0').optional(),
-  targetAmount: z.coerce.number().min(1, 'Target amount must be greater than 0').optional(),
   beneficiaries: z.string().optional().nullable(),
   location: z.string().optional().nullable(),
   is_featured: z.coerce.boolean().optional().default(false),
@@ -25,9 +23,6 @@ const createProjectSchema = z.object({
 }).refine(data => data.category_id !== undefined || data.categoryId !== undefined, {
   message: 'Valid category ID is required',
   path: ['category_id']
-}).refine(data => data.target_amount !== undefined || data.targetAmount !== undefined, {
-  message: 'Target amount must be greater than 0',
-  path: ['target_amount']
 }).transform(data => {
   const summary = data.summary || data.shortDescription;
   return {
@@ -35,7 +30,6 @@ const createProjectSchema = z.object({
     summary,
     description: data.description || summary,
     category_id: data.category_id !== undefined ? data.category_id : data.categoryId,
-    target_amount: data.target_amount !== undefined ? data.target_amount : data.targetAmount,
     hero_image_url: data.hero_image_url || data.imageUrl || null
   };
 });
@@ -47,8 +41,6 @@ const updateProjectSchema = z.object({
   description: z.string().optional(),
   category_id: z.coerce.number().int().positive().optional(),
   categoryId: z.coerce.number().int().positive().optional(),
-  target_amount: z.coerce.number().min(1).optional(),
-  targetAmount: z.coerce.number().min(1).optional(),
   status: z.string().optional(),
   beneficiaries: z.string().optional().nullable(),
   location: z.string().optional().nullable(),
@@ -60,7 +52,6 @@ const updateProjectSchema = z.object({
   summary: data.summary || data.shortDescription || data.summary,
   description: data.description || (data.shortDescription ? data.shortDescription : data.description),
   category_id: data.category_id !== undefined ? data.category_id : data.categoryId,
-  target_amount: data.target_amount !== undefined ? data.target_amount : data.targetAmount,
   hero_image_url: data.hero_image_url !== undefined ? data.hero_image_url : data.imageUrl
 }));
 

@@ -12,13 +12,7 @@ const destructiveSeedTables = {
   '004_projects_seed.sql': ['projects', 'project_images', 'project_updates'],
   '005_news_and_events_seed.sql': ['news_articles', 'events', 'event_registrations'],
   '006_documents_and_media_seed.sql': ['documents', 'media_files'],
-  '007_trust_profile_seed.sql': ['trust_profile'],
-  '008_donations_seed.sql': [
-    'donations',
-    'donation_receipts',
-    'payment_transactions',
-    'payment_orders'
-  ]
+  '007_trust_profile_seed.sql': ['trust_profile']
 };
 
 async function shouldSkipSeed(file, client) {

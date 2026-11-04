@@ -3,10 +3,8 @@ import { NavLink, Outlet, Link, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
   FolderKanban,
-  HeartHandshake,
   Users,
   MessageSquareText,
-  FileBarChart,
   LogOut,
   ExternalLink,
   Shield,
@@ -28,10 +26,8 @@ export default function AdminLayout() {
   const navItems = [
     { label: 'Overview', path: '/admin', icon: LayoutDashboard, end: true },
     { label: 'Projects', path: '/admin/projects', icon: FolderKanban },
-    { label: 'Donation Ledger', path: '/admin/donations', icon: HeartHandshake },
     { label: 'User Roles', path: '/admin/users', icon: Users },
     { label: 'Inquiries Inbox', path: '/admin/inquiries', icon: MessageSquareText },
-    { label: 'Reports & 80G', path: '/admin/reports', icon: FileBarChart },
   ];
 
   return (

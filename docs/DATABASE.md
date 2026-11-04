@@ -9,14 +9,13 @@
 ## 1. Architectural Principles
 
 1. **Strict Referential Integrity**: Foreign keys with appropriate `ON DELETE RESTRICT` or `ON DELETE CASCADE` actions.
-2. **Soft Deletions**: Entities linked to financial or historical transactions (e.g. `projects`, `news_articles`) utilize `is_deleted BOOLEAN DEFAULT FALSE` and `deleted_at TIMESTAMP WITH TIME ZONE`.
+2. **Soft Deletions**: Content entities (e.g. `projects`, `news_articles`) utilize `is_deleted BOOLEAN DEFAULT FALSE` and `deleted_at TIMESTAMP WITH TIME ZONE`.
 3. **Audit Trails**: Core entities maintain `created_at`, `updated_at`, and `created_by`. Sensitive operations record state in `audit_logs`.
 4. **Data Security & Privacy**:
    - Passwords stored only as bcrypt hashes.
-   - **Zero** storage of credit card numbers, CVVs, UPI PINs, or banking passwords.
-   - Idempotency keys on payment transactions to prevent duplicate processing.
+   - Donation QR payments are made directly through the trust's UPI provider; the application does not process or store them.
 5. **Performance Indexing**:
-   - B-tree indexes on foreign keys, email lookups, project slugs, donation statuses, and date filters.
+   - B-tree indexes on foreign keys, email lookups, project slugs, and date filters.
 
 ---
 
@@ -32,22 +31,16 @@
        +---------------+             +--------------------+
        |     users     | ----------> |     audit_logs     |
        +---------------+             +--------------------+
-          |         |
-          |         +-------------------+
-          v                             v
-+-------------------+         +--------------------+
-|     projects      |         |     donations      | <-----+
-+-------------------+         +--------------------+       |
-   ^             |                      |                  |
-   |             v                      v                  v
-+------------+ +----------------+ +----------------+ +-------------+
-| categories | | project_updates| |payment_orders  | |  receipts   |
-+------------+ +----------------+ +----------------+ +-------------+
-                                        |
-                                        v
-                                  +--------------------+
-                                  |payment_transactions|
-                                  +--------------------+
+                                             ^
+                                             |
+                                  +-------------------+
+                                  |     projects      |
+                                  +-------------------+
+                                    ^             |
+                                    |             v
+                              +------------+ +----------------+
+                              | categories | | project_updates|
+                              +------------+ +----------------+
 ```
 
 ---
@@ -58,13 +51,13 @@
 
 #### `roles`
 - `id` (SERIAL PRIMARY KEY)
-- `name` (VARCHAR(50) UNIQUE NOT NULL) — `ADMIN`, `STAFF`, `MEMBER`, `DONOR`, `VOLUNTEER`
+- `name` (VARCHAR(50) UNIQUE NOT NULL) — `ADMIN`, `STAFF`, `MEMBER`, `VOLUNTEER`
 - `description` (TEXT)
 - `created_at` (TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP)
 
 #### `permissions`
 - `id` (SERIAL PRIMARY KEY)
-- `code` (VARCHAR(100) UNIQUE NOT NULL) — e.g. `projects:create`, `donations:read`, `reports:export`
+- `code` (VARCHAR(100) UNIQUE NOT NULL) — e.g. `projects:create`, `users:manage`
 - `module` (VARCHAR(50) NOT NULL)
 - `description` (TEXT)
 
@@ -80,7 +73,6 @@
 - `password_hash` (VARCHAR(255) NOT NULL)
 - `phone` (VARCHAR(20))
 - `address` (TEXT)
-- `pan_number` (VARCHAR(10))
 - `is_active` (BOOLEAN DEFAULT TRUE)
 - `last_login_at` (TIMESTAMPTZ)
 - `created_at` (TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP)
@@ -110,8 +102,6 @@
 - `summary` (VARCHAR(500) NOT NULL)
 - `description` (TEXT NOT NULL)
 - `category_id` (INT REFERENCES categories(id) ON DELETE RESTRICT)
-- `target_amount` (NUMERIC(14, 2) NOT NULL DEFAULT 0.00)
-- `raised_amount` (NUMERIC(14, 2) NOT NULL DEFAULT 0.00)
 - `beneficiaries` (VARCHAR(255))
 - `location` (VARCHAR(255))
 - `status` (VARCHAR(30) DEFAULT 'ACTIVE') — `DRAFT`, `ACTIVE`, `COMPLETED`, `ARCHIVED`
@@ -133,53 +123,13 @@
 
 ---
 
-### 3.3 Donations & Payments
+### 3.3 Donations
 
-#### `donations`
-- `id` (UUID PRIMARY KEY DEFAULT gen_random_uuid())
-- `user_id` (UUID REFERENCES users(id) ON DELETE SET NULL)
-- `project_id` (UUID REFERENCES projects(id) ON DELETE SET NULL)
-- `amount` (NUMERIC(12, 2) NOT NULL CHECK (amount > 0))
-- `currency` (VARCHAR(3) DEFAULT 'INR')
-- `donor_name` (VARCHAR(150) NOT NULL)
-- `donor_email` (VARCHAR(255) NOT NULL)
-- `donor_phone` (VARCHAR(20))
-- `donor_pan` (VARCHAR(10))
-- `donor_address` (TEXT)
-- `is_anonymous` (BOOLEAN DEFAULT FALSE)
-- `is_80g_claimed` (BOOLEAN DEFAULT TRUE)
-- `status` (VARCHAR(30) DEFAULT 'PENDING') — `PENDING`, `COMPLETED`, `FAILED`, `REFUNDED`
-- `receipt_number` (VARCHAR(50) UNIQUE)
-- `payment_method` (VARCHAR(20)) — `UPI_QR` for manually reconciled transfers.
-- `payment_reference` (VARCHAR(100)) — donor-reported UPI reference; unique case-insensitively for UPI QR submissions.
-- `created_at` (TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP)
-- `updated_at` (TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP)
-
-Migration `011_add_upi_donation_reconciliation.sql` adds the payment method/reference fields and indexes pending manual review rows. UPI reports remain `PENDING` until an administrator verifies the transaction against bank records.
-
-#### `payment_orders`
-- `id` (UUID PRIMARY KEY DEFAULT gen_random_uuid())
-- `donation_id` (UUID REFERENCES donations(id) ON DELETE CASCADE)
-- `gateway_order_id` (VARCHAR(100) UNIQUE NOT NULL)
-- `gateway_name` (VARCHAR(50) NOT NULL DEFAULT 'RAZORPAY')
-- `amount_in_paise` (BIGINT NOT NULL)
-- `currency` (VARCHAR(3) DEFAULT 'INR')
-- `status` (VARCHAR(30) DEFAULT 'CREATED')
-- `created_at` (TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP)
-
-#### `payment_transactions`
-- `id` (UUID PRIMARY KEY DEFAULT gen_random_uuid())
-- `donation_id` (UUID REFERENCES donations(id) ON DELETE CASCADE)
-- `gateway_payment_id` (VARCHAR(100) UNIQUE NOT NULL)
-- `gateway_order_id` (VARCHAR(100) NOT NULL)
-- `payment_method` (VARCHAR(50)) — `UPI`, `NETBANKING`, `CARD`, `WALLET`
-- `amount` (NUMERIC(12, 2) NOT NULL)
-- `fee` (NUMERIC(10, 2) DEFAULT 0.00)
-- `tax` (NUMERIC(10, 2) DEFAULT 0.00)
-- `gateway_signature` (VARCHAR(255))
-- `webhook_payload` (JSONB)
-- `status` (VARCHAR(30) NOT NULL) — `CAPTURED`, `FAILED`
-- `created_at` (TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP)
+The public donation page displays the static QR image from the frontend assets. Payments happen outside the
+application, so there are no donation, payment, receipt, or contribution-tracking
+tables. Migration `012_remove_donation_and_payment_data.sql` removes legacy donation
+and payment tables, donor records, contribution-related audit entries, funding fields,
+and trust-profile QR/80G configuration from existing databases.
 
 ---
 
@@ -262,7 +212,7 @@ Migration `011_add_upi_donation_reconciliation.sql` adds the payment method/refe
 #### `audit_logs`
 - `id` (BIGSERIAL PRIMARY KEY)
 - `user_id` (UUID REFERENCES users(id) ON DELETE SET NULL)
-- `action` (VARCHAR(100) NOT NULL) — `PROJECT_CREATED`, `DONATION_VERIFIED`, `USER_ROLE_UPDATED`
+- `action` (VARCHAR(100) NOT NULL) — `PROJECT_CREATED`, `USER_ROLE_UPDATED`
 - `entity_type` (VARCHAR(50) NOT NULL)
 - `entity_id` (VARCHAR(100) NOT NULL)
 - `old_values` (JSONB)

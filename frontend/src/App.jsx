@@ -25,10 +25,8 @@ const NotFoundPage = lazy(() => import('./pages/public/NotFoundPage'));
 const LoginPage = lazy(() => import('./pages/auth/LoginPage'));
 const DashboardPage = lazy(() => import('./pages/admin/DashboardPage'));
 const AdminProjectsPage = lazy(() => import('./pages/admin/AdminProjectsPage'));
-const AdminDonationsPage = lazy(() => import('./pages/admin/AdminDonationsPage'));
 const AdminUsersPage = lazy(() => import('./pages/admin/AdminUsersPage'));
 const AdminInquiriesPage = lazy(() => import('./pages/admin/AdminInquiriesPage'));
-const AdminReportsPage = lazy(() => import('./pages/admin/AdminReportsPage'));
 
 export default function App() {
   return (
@@ -65,10 +63,8 @@ export default function App() {
         >
           <Route index element={<DashboardPage />} />
           <Route path="projects" element={<AdminProjectsPage />} />
-          <Route path="donations" element={<AdminDonationsPage />} />
           <Route path="users" element={<AdminUsersPage />} />
           <Route path="inquiries" element={<AdminInquiriesPage />} />
-          <Route path="reports" element={<AdminReportsPage />} />
         </Route>
       </Routes>
     </Suspense>

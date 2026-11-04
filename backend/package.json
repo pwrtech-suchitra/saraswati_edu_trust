@@ -16,9 +16,7 @@
     "trust",
     "ngo",
     "express",
-    "postgresql",
-    "payments",
-    "donations"
+    "postgresql"
   ],
   "author": "Suchitra Mishra",
   "license": "ISC",

@@ -57,7 +57,7 @@ async function getProjects({ category = null, status = null, search = null, page
   params.push(limit, offset);
   const dataSql = `
     SELECT 
-      p.id, p.title, p.slug, p.summary, p.target_amount, p.raised_amount,
+      p.id, p.title, p.slug, p.summary,
       p.beneficiaries, p.location, p.status, p.hero_image_url, p.is_featured, p.created_at,
       c.id as category_id, c.name as category_name, c.slug as category_slug
     FROM projects p
@@ -89,8 +89,7 @@ async function getProjectByIdOrSlug(identifier) {
   const text = `
     SELECT 
       p.*,
-      c.id as category_id, c.name as category_name, c.slug as category_slug,
-      (SELECT COUNT(*) FROM donations WHERE project_id = p.id AND status = 'COMPLETED') as donor_count
+      c.id as category_id, c.name as category_name, c.slug as category_slug
     FROM projects p
     LEFT JOIN categories c ON p.category_id = c.id
     WHERE ${condition} AND p.is_deleted = FALSE
@@ -137,9 +136,9 @@ async function createProject(data, userId = null) {
 
   const text = `
     INSERT INTO projects (
-      title, slug, summary, description, category_id, target_amount,
+      title, slug, summary, description, category_id,
       beneficiaries, location, hero_image_url, is_featured, created_by
-    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
     RETURNING *
   `;
   const res = await db.query(text, [
@@ -148,7 +147,6 @@ async function createProject(data, userId = null) {
     data.summary,
     data.description,
     data.category_id,
-    data.target_amount,
     data.beneficiaries || null,
     data.location || null,
     data.hero_image_url || null,
@@ -167,7 +165,7 @@ async function updateProject(id, data) {
   const values = [];
   let idx = 1;
 
-  const allowed = ['title', 'summary', 'description', 'category_id', 'target_amount', 'status', 'beneficiaries', 'location', 'hero_image_url', 'is_featured'];
+  const allowed = ['title', 'summary', 'description', 'category_id', 'status', 'beneficiaries', 'location', 'hero_image_url', 'is_featured'];
   for (const key of allowed) {
     if (data[key] !== undefined) {
       fields.push(`${key} = $${idx++}`);

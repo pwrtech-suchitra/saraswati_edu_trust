@@ -1,11 +1,13 @@
 # SECT Web Application — Antigravity Team Development Rules
 
 **Project:** Saraswati Educational & Charitable Trust (SECT) Web Application  
-**Architecture:** React + Node.js/Express + PostgreSQL + Payment Gateway  
+**Architecture:** React + Node.js/Express + PostgreSQL + external UPI QR
 **Development Model:** 3 developers, 3 devices, 3 separate IDE/Antigravity environments  
 **Shared Instruction File:** This file must be kept in the common project repository and read by every developer's Antigravity agent.
 
 ---
+
+> **Current donation behavior:** The public site displays the trust's UPI QR code only. The application does not process payments or store donation records. Payment-flow guidance in this historical team document is superseded by this behavior and migration `012_remove_donation_and_payment_data.sql`.
 
 ## 1. Purpose of This File
 

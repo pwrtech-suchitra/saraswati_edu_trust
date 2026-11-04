@@ -15,9 +15,6 @@ const validProductionEnvironment = {
   USE_EMBEDDED_DB: 'false',
   JWT_SECRET: 'a'.repeat(40),
   JWT_REFRESH_SECRET: 'b'.repeat(40),
-  PAYMENT_KEY_ID: 'rzp_live_sect_482a9',
-  PAYMENT_KEY_SECRET: 'c'.repeat(32),
-  PAYMENT_WEBHOOK_SECRET: 'd'.repeat(40),
   FRONTEND_URL: 'https://sect.example.test'
 };
 
@@ -42,16 +39,6 @@ test('production configuration accepts complete production settings', () => {
   assert.strictEqual(result.status, 0, result.stderr);
 });
 
-test('production configuration accepts QR-only donations without gateway credentials', () => {
-  const result = loadProductionConfig({
-    PAYMENT_KEY_ID: '',
-    PAYMENT_KEY_SECRET: '',
-    PAYMENT_WEBHOOK_SECRET: ''
-  });
-
-  assert.strictEqual(result.status, 0, result.stderr);
-});
-
 test('production configuration rejects placeholder authentication secrets', () => {
   const result = loadProductionConfig({
     JWT_SECRET: 'change_me_to_a_long_secret_value_123456',
@@ -62,15 +49,13 @@ test('production configuration rejects placeholder authentication secrets', () =
   assert.match(result.stderr, /JWT_SECRET must be a non-placeholder value/);
 });
 
-test('production configuration rejects embedded databases and configured non-live payment keys', () => {
+test('production configuration rejects embedded databases', () => {
   const result = loadProductionConfig({
-    USE_EMBEDDED_DB: 'true',
-    PAYMENT_KEY_ID: 'rzp_test_examplekey'
+    USE_EMBEDDED_DB: 'true'
   });
 
   assert.notStrictEqual(result.status, 0);
   assert.match(result.stderr, /USE_EMBEDDED_DB cannot be enabled in production/);
-  assert.match(result.stderr, /PAYMENT_KEY_ID must be a live Razorpay key when gateway settings are configured/);
 });
 
 test('production configuration requires HTTPS for the frontend origin', () => {

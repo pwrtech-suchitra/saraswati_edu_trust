@@ -3,13 +3,11 @@ import { useParams, Link } from 'react-router-dom';
 import {
   Heart,
   ArrowLeft,
-  Users,
   Calendar,
-  ShieldCheck,
   Share2,
 } from 'lucide-react';
 import { projectApi } from '../../api/projectApi';
-import { formatINR, calculateProgress, formatDate } from '../../utils/formatters';
+import { formatDate } from '../../utils/formatters';
 import { Spinner } from '../../components/common/Loader';
 import Alert from '../../components/common/Alert';
 import Button from '../../components/common/Button';
@@ -71,8 +69,6 @@ export default function ProjectDetailPage() {
       </div>
     );
   }
-
-  const progress = calculateProgress(project.raisedAmount, project.targetAmount);
 
   return (
     <div style={{ paddingBottom: '5rem' }}>
@@ -155,7 +151,7 @@ export default function ProjectDetailPage() {
 
           </div>
 
-          {/* Right: Funding Progress Card & Direct Action */}
+          {/* Right: Project Actions */}
           <div>
             <div
               className="card card-padded"
@@ -167,7 +163,7 @@ export default function ProjectDetailPage() {
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
                 <span className="badge badge-warning" style={{ fontSize: '0.85rem' }}>
-                  Active Campaign
+                  Active Project
                 </span>
                 <button
                   onClick={handleShare}
@@ -178,26 +174,6 @@ export default function ProjectDetailPage() {
                   <Share2 size={15} />
                   <span>Share</span>
                 </button>
-              </div>
-
-              <div style={{ marginBottom: '1.5rem' }}>
-                <div style={{ fontSize: '2.1rem', fontWeight: 800, color: 'var(--color-slate-900)', lineHeight: '1.1' }}>
-                  {formatINR(project.raisedAmount)}
-                </div>
-                <div style={{ fontSize: '0.9rem', color: 'var(--color-slate-500)', marginTop: '0.2rem' }}>
-                  pledged of {formatINR(project.targetAmount)} target goal
-                </div>
-
-                <div className="progress-bar-wrap" style={{ height: '10px', margin: '1rem 0' }}>
-                  <div className="progress-bar-fill" style={{ width: `${progress}%` }} />
-                </div>
-
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.88rem', fontWeight: 600 }}>
-                  <span style={{ color: 'var(--color-primary-700)' }}>{progress}% Complete</span>
-                  <span style={{ color: 'var(--color-slate-600)', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                    {project.donorCount !== undefined && project.donorCount !== null && <><Users size={15} /> {project.donorCount} Donors</>}
-                  </span>
-                </div>
               </div>
 
               {/* Timeline Info */}
@@ -219,26 +195,15 @@ export default function ProjectDetailPage() {
               </div>}
 
               {/* Action */}
-              <Link to={`/donate?project=${project.id}`} style={{ width: '100%' }}>
+              <Link to="/donate" style={{ width: '100%' }}>
                 <Button variant="amber" size="lg" icon={Heart} style={{ width: '100%', marginBottom: '0.75rem' }}>
                   Donate to this Project
                 </Button>
               </Link>
 
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '0.4rem',
-                  fontSize: '0.8rem',
-                  color: 'var(--color-primary-700)',
-                  fontWeight: 600,
-                }}
-              >
-                <ShieldCheck size={16} />
-                <span>UPI transfers are confirmed against Trust bank records</span>
-              </div>
+              <p style={{ textAlign: 'center', fontSize: '0.8rem', color: 'var(--color-slate-500)', margin: 0 }}>
+                Donations are made directly using the official SECT QR code and are not recorded by this website.
+              </p>
             </div>
           </div>
         </div>

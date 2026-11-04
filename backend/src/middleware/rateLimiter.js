@@ -31,21 +31,7 @@ const authLimiter = rateLimit({
   }
 });
 
-// Payment order / verification limiter
-const paymentLimiter = rateLimit({
-  windowMs: 10 * 60 * 1000,
-  max: 50,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: {
-    success: false,
-    message: 'Payment request limit reached. Please wait before retrying.',
-    errors: [{ code: 'PAYMENT_RATE_LIMIT_EXCEEDED' }]
-  }
-});
-
 module.exports = {
   generalLimiter,
-  authLimiter,
-  paymentLimiter
+  authLimiter
 };

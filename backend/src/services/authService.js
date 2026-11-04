@@ -16,7 +16,7 @@ function generateTokens(user) {
   const payload = {
     id: user.id,
     email: user.email,
-    role: user.role || ROLES.DONOR
+    role: user.role || ROLES.MEMBER
   };
 
   const accessToken = jwt.sign(payload, config.jwt.secret, {
@@ -33,7 +33,7 @@ function generateTokens(user) {
 /**
  * Register new user
  */
-async function registerUser({ full_name, email, password, phone = null, address = null, role = ROLES.DONOR }) {
+async function registerUser({ full_name, email, password, phone = null, address = null, role = ROLES.MEMBER }) {
   const existingRes = await db.query('SELECT id FROM users WHERE email = $1', [email.toLowerCase().trim()]);
   if (existingRes.rowCount > 0) {
     const error = new Error('An account with this email already exists.');
@@ -59,7 +59,10 @@ async function registerUser({ full_name, email, password, phone = null, address 
 
     // 2. Fetch role ID
     const roleRes = await client.query('SELECT id FROM roles WHERE name = $1', [role]);
-    const roleId = roleRes.rowCount > 0 ? roleRes.rows[0].id : 4; // Default DONOR
+    if (roleRes.rowCount === 0) {
+      throw new Error(`Role ${role} is not configured`);
+    }
+    const roleId = roleRes.rows[0].id;
 
     // 3. Assign role
     await client.query('INSERT INTO user_roles (user_id, role_id) VALUES ($1, $2)', [newUser.id, roleId]);

@@ -48,7 +48,7 @@ test('generateTokens creates valid JWT access and refresh tokens with user paylo
   const mockUser = {
     id: '11111111-1111-1111-1111-111111111111',
     email: 'donor@sect.org',
-    role: 'DONOR'
+    role: 'MEMBER'
   };
 
   const tokens = generateTokens(mockUser);

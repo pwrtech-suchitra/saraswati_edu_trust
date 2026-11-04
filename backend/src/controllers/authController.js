@@ -43,7 +43,7 @@ async function getProfile(req, res, next) {
   try {
     const userId = req.user.id;
     const text = `
-      SELECT u.id, u.full_name, u.email, u.phone, u.address, u.pan_number, u.created_at, r.name as role
+      SELECT u.id, u.full_name, u.email, u.phone, u.address, u.created_at, r.name as role
       FROM users u
       LEFT JOIN user_roles ur ON u.id = ur.user_id
       LEFT JOIN roles r ON ur.role_id = r.id

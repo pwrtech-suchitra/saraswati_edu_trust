@@ -33,15 +33,6 @@ INSERT INTO news_articles (
     '2024-11-10 09:30:00+05:30'
 ),
 (
-    'SECT Dispatches Annual 80G Tax Exemption Certificates',
-    'annual-80g-tax-certificates-dispatched',
-    'All verified financial contributions for the fiscal cycle receive signed Section 80G receipts from SECT Secretariat.',
-    'The Finance Secretariat of Saraswati Educational & Charitable Trust announces that digital 80G tax receipts and Form 10BE filing acknowledgements have been successfully generated and dispatched to all registered donors. Donors can verify certificates via the online portal.',
-    'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&w=800&q=80',
-    TRUE,
-    '2025-04-05 11:15:00+05:30'
-),
-(
     'Organic Dairy Farm & Agro-Ecological Training Centre Established',
     'organic-dairy-farm-training-centre-established',
     'State-of-the-art demonstration facility promotes bio-compost, bio-pesticides, and zero chemical dependency.',

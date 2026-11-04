@@ -5,6 +5,8 @@
 **Workspace:** `c:\Users\Suchitra Mishra\Desktop\SECT\`  
 **Reference Documents:** `ANTIGRAVITY_TEAM_RULES.md` & `suchitra-backend-plan.md`  
 
+> **Current donation behavior:** This historical plan's donation/payment flow is superseded. The live frontend displays the trust's UPI QR code only and does not submit or record contributions.
+
 ---
 
 ## 1. Cross-Document Analysis & Role Boundary Verification

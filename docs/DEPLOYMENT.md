@@ -30,7 +30,7 @@ Then configure the frontend service:
 2. Generate a Railway public domain for this service and use its HTTPS origin as the API service's `FRONTEND_URL`.
 3. Set the frontend health check path to `/`. Requests to `/api/*` and `/uploads/*` are forwarded to the configured private API origin; other paths are served from the SPA build.
 
-Attach any custom domain to the frontend service and update `FRONTEND_URL` to that exact HTTPS origin. Redeploy the API after changing the value. Do not configure production payment keys until the Trust chooses and verifies its donation workflow. Email delivery is not implemented. Registration/80G fields remain blank by request and must not be populated with unverified values.
+Attach any custom domain to the frontend service and update `FRONTEND_URL` to that exact HTTPS origin. Redeploy the API after changing the value. Donations use only the public QR code; no payment credentials are required. Email delivery is not implemented.
 
 This Railway layout still uses a single API instance and local persistent upload storage. Configure database and volume backups and test restoration before launch. The Docker Compose deployment below remains available for single-host deployments.
 
@@ -40,7 +40,7 @@ This Railway layout still uses a single API instance and local persistent upload
 - A DNS name whose A/AAAA records point to the Docker host.
 - Inbound TCP ports 80 and 443 (and UDP 443 if HTTP/3 is desired).
 - A managed PostgreSQL database reachable from the host, with certificate validation enabled and separate application/migration roles.
-- The trust's approved UPI donation QR code and contact details for manual payment acknowledgement.
+- The trust's approved UPI donation QR code and contact details for assistance.
 
 ## Configure
 
@@ -94,9 +94,9 @@ Before releasing, run `node deploy/check-compose-config.cjs`. This resolves the 
 - Deploy one API replica while using local upload storage. A named volume is not shared across hosts.
 - Review container logs and configure host-level uptime, disk, database, and certificate-expiry alerts.
 - Apply schema migrations as a release step before starting the new application version. Do not seed demo data in production.
-- Donors submit the UPI transaction reference and amount; submissions remain pending. An authenticated administrator must confirm against the Trust bank/UPI statement before the application marks it complete, updates project totals, or issues a receipt. A donor-provided screenshot alone is not authoritative payment confirmation.
+- Donations are completed directly through the QR code and are not submitted to or recorded by the application.
 - Protect `DATABASE_URL` and `MIGRATION_DATABASE_URL` separately; never mount the migrator credential into the long-running API container.
-- Email delivery is not implemented/configured; the application logs that receipts and inquiry notifications were not sent. Do not promise email delivery until an email provider is integrated and tested.
+- Email delivery is not implemented/configured; the application logs that inquiry notifications were not sent. Do not promise email delivery until an email provider is integrated and tested.
 - The Docker Compose stack is a single-host deployment, not a substitute for provider-level database backups, failover, or disaster recovery.
 
 ## Go-live gates
@@ -105,9 +105,9 @@ Do not expose the site publicly until all of these are verified in staging:
 
 - Replace the example environment values with real, separately provisioned runtime and migration database credentials, distinct JWT secrets, and the real public hostname. Keep credentials in a secret manager or protected deployment environment.
 - Confirm DNS, firewall rules, HTTPS certificate issuance, database TLS, least-privilege grants, and successful backup restoration.
-- Review every public trust-profile field, document, contact detail, and the live UPI QR/payee with the Trust. Registration and 80G fields are currently blank by request; only add verified official values if authorized. QR payment must be confirmed against bank records before being marked complete.
-- Choose whether production donations use manual UPI reconciliation or a configured live payment gateway. Test the complete donor, admin verification, receipt, and refund/accounting procedures before accepting donations.
-- Email delivery is not implemented. Do not promise donor receipts or inquiry notifications by email until a provider is integrated and end-to-end tested.
+- Review every public trust-profile field, document, contact detail, and the live UPI QR/payee with the Trust.
+- Test the donation page and contact assistance; QR payments happen outside the application and are not tracked or acknowledged by the website.
+- Email delivery is not implemented. Do not promise inquiry notifications by email until a provider is integrated and end-to-end tested.
 - Run the production Compose check, dependency audits, backend tests, frontend build, container builds, and authenticated/anonymous smoke tests. Complete staging load tests against agreed latency, error-rate, and traffic targets; local development load numbers are not capacity guarantees.
 - Assign an operator for security updates, logs/alerts, backup monitoring, incident response, and rollback.
 

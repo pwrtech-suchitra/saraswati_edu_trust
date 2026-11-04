@@ -25,12 +25,8 @@ if (config.nodeEnv !== 'test') {
   app.use(morgan(config.nodeEnv === 'production' ? 'combined' : 'dev'));
 }
 
-// 3. Body parsers with rawBody preservation for webhooks
-app.use(express.json({
-  verify: (req, res, buf) => {
-    req.rawBody = buf.toString();
-  }
-}));
+// 3. Body parsers
+app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // 4. Rate limiting for all incoming traffic

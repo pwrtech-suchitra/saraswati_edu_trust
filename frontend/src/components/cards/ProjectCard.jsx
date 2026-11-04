@@ -1,12 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Heart, Users } from 'lucide-react';
-import { formatINR, calculateProgress } from '../../utils/formatters';
+import { Heart } from 'lucide-react';
 import Button from '../common/Button';
 
 export default function ProjectCard({ project }) {
-  const progress = calculateProgress(project.raisedAmount, project.targetAmount);
-
   return (
     <div className="card">
       {/* Project Image */}
@@ -45,32 +42,18 @@ export default function ProjectCard({ project }) {
           {project.shortDescription}
         </p>
 
-        {/* Progress */}
         <div style={{ marginTop: 'auto' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', fontWeight: 600 }}>
-            <span style={{ color: 'var(--color-primary-700)' }}>Raised: {formatINR(project.raisedAmount)}</span>
-            <span style={{ color: 'var(--color-slate-500)' }}>Goal: {formatINR(project.targetAmount)}</span>
-          </div>
-
-          <div className="progress-bar-wrap">
-            <div className="progress-bar-fill" style={{ width: `${progress}%` }} />
-          </div>
-
           <div
             style={{
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'space-between',
+              justifyContent: 'flex-end',
               fontSize: '0.8rem',
               color: 'var(--color-slate-500)',
-              marginTop: '0.35rem',
               marginBottom: '1.25rem',
             }}
           >
-            {project.donorCount !== undefined && project.donorCount !== null && <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-              <Users size={14} /> {project.donorCount} Patrons
-            </span>}
-            <span style={{ fontWeight: 700, color: 'var(--color-amber-600)' }}>{progress}% Funded</span>
+            <span>Support this project with the SECT QR code</span>
           </div>
 
           {/* Action */}
@@ -80,7 +63,7 @@ export default function ProjectCard({ project }) {
                 Details
               </Button>
             </Link>
-            <Link to={`/donate?project=${project.id}`} style={{ flex: 1 }}>
+            <Link to="/donate" style={{ flex: 1 }}>
               <Button variant="amber" size="sm" icon={Heart} style={{ width: '100%' }}>
                 Donate
               </Button>

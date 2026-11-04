@@ -5,7 +5,6 @@ INSERT INTO roles (id, name, description) VALUES
 (1, 'ADMIN', 'Full administrative authority across all modules and reports'),
 (2, 'STAFF', 'Content, project, and inquiry management access'),
 (3, 'MEMBER', 'Registered community trust member'),
-(4, 'DONOR', 'Supporter with donation history and 80G receipt access'),
 (5, 'VOLUNTEER', 'Registered field/event volunteer')
 ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, description = EXCLUDED.description;
 
@@ -15,8 +14,6 @@ INSERT INTO permissions (code, module, description) VALUES
 ('projects:create', 'projects', 'Create new projects'),
 ('projects:update', 'projects', 'Update project details and status'),
 ('projects:delete', 'projects', 'Archive/delete projects'),
-('donations:read', 'donations', 'View donation records and tax receipts'),
-('reports:view', 'reports', 'View analytical and financial reports'),
 ('users:manage', 'users', 'Manage system users and assign roles'),
 ('inquiries:manage', 'inquiries', 'Respond to and update inquiry statuses')
 ON CONFLICT (code) DO NOTHING;

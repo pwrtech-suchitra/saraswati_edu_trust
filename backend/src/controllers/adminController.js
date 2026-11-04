@@ -6,88 +6,24 @@
 const db = require('../config/db');
 const ApiResponse = require('../utils/apiResponse');
 const { logAction } = require('../services/auditService');
-const manualDonationService = require('../services/manualDonationService');
-
-async function listDonations(req, res, next) {
-  try {
-    const status = req.query.status || null;
-    if (status && !['PENDING', 'COMPLETED', 'FAILED', 'REFUNDED'].includes(status)) {
-      return ApiResponse.error(res, 'Invalid donation status filter.', [], 400);
-    }
-    const donations = await manualDonationService.listDonations({ status });
-    return ApiResponse.success(res, 'Donation submissions retrieved', donations);
-  } catch (err) {
-    next(err);
-  }
-}
-
-async function confirmManualDonation(req, res, next) {
-  try {
-    const result = await manualDonationService.confirmManualDonation({
-      donationId: req.params.id,
-      adminUserId: req.user.id
-    });
-    return ApiResponse.success(res, 'Donation confirmed against trust bank records', result);
-  } catch (err) {
-    next(err);
-  }
-}
-
-async function rejectManualDonation(req, res, next) {
-  try {
-    const result = await manualDonationService.rejectManualDonation({
-      donationId: req.params.id,
-      adminUserId: req.user.id
-    });
-    return ApiResponse.success(res, 'Donation submission rejected', result);
-  } catch (err) {
-    next(err);
-  }
-}
 
 async function getDashboardStats(req, res, next) {
   try {
-    // 1. Total donations collected
-    const donRes = await db.query(`
-      SELECT 
-        COALESCE(SUM(amount), 0) as total_amount,
-        COUNT(DISTINCT donor_email) as total_donors,
-        COUNT(*) as total_donations
-      FROM donations
-      WHERE status = 'COMPLETED'
-    `);
-
-    // 2. Active projects count
     const projRes = await db.query(`
       SELECT COUNT(*) as active_count
       FROM projects
       WHERE status = 'ACTIVE' AND is_deleted = FALSE
     `);
 
-    // 3. Pending inquiries
     const inqRes = await db.query(`
       SELECT COUNT(*) as pending_count
       FROM inquiries
       WHERE status = 'PENDING'
     `);
 
-    // 4. Recent completed donations
-    const recentRes = await db.query(`
-      SELECT d.id, d.donor_name, d.amount, d.currency, d.receipt_number, d.created_at, p.title as project_title
-      FROM donations d
-      LEFT JOIN projects p ON d.project_id = p.id
-      WHERE d.status = 'COMPLETED'
-      ORDER BY d.created_at DESC
-      LIMIT 5
-    `);
-
     return ApiResponse.success(res, 'Admin metrics retrieved', {
-      total_donations_amount: parseFloat(donRes.rows[0].total_amount),
-      total_donors_count: parseInt(donRes.rows[0].total_donors, 10),
-      total_donations_count: parseInt(donRes.rows[0].total_donations, 10),
       active_projects_count: parseInt(projRes.rows[0].active_count, 10),
-      pending_inquiries_count: parseInt(inqRes.rows[0].pending_count, 10),
-      recent_donations: recentRes.rows
+      pending_inquiries_count: parseInt(inqRes.rows[0].pending_count, 10)
     });
   } catch (err) {
     next(err);
@@ -184,9 +120,6 @@ async function updateUserRole(req, res, next) {
 }
 
 module.exports = {
-  listDonations,
-  confirmManualDonation,
-  rejectManualDonation,
   getDashboardStats,
   listUsers,
   updateUserRole

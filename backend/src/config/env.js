@@ -72,23 +72,6 @@ function assertProductionConfiguration() {
     errors.push('USE_EMBEDDED_DB cannot be enabled in production');
   }
 
-  const paymentSettings = [
-    process.env.PAYMENT_KEY_ID,
-    process.env.PAYMENT_KEY_SECRET,
-    process.env.PAYMENT_WEBHOOK_SECRET
-  ];
-  if (paymentSettings.some(Boolean)) {
-    if (
-      !process.env.PAYMENT_KEY_ID ||
-      !process.env.PAYMENT_KEY_ID.startsWith('rzp_live_') ||
-      /placeholder|example|your_/i.test(process.env.PAYMENT_KEY_ID)
-    ) {
-      errors.push('PAYMENT_KEY_ID must be a live Razorpay key when gateway settings are configured');
-    }
-    rejectPlaceholder('PAYMENT_KEY_SECRET', process.env.PAYMENT_KEY_SECRET, 16);
-    rejectPlaceholder('PAYMENT_WEBHOOK_SECRET', process.env.PAYMENT_WEBHOOK_SECRET, 32);
-  }
-
   if (!process.env.FRONTEND_URL) {
     errors.push('FRONTEND_URL is required in production');
   } else {
@@ -121,12 +104,6 @@ const config = {
     expiresIn: process.env.JWT_EXPIRES_IN || '1h',
     refreshSecret: process.env.JWT_REFRESH_SECRET || developmentRefreshSecret,
     refreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d'
-  },
-
-  payment: {
-    keyId: process.env.PAYMENT_KEY_ID || '',
-    keySecret: process.env.PAYMENT_KEY_SECRET || '',
-    webhookSecret: process.env.PAYMENT_WEBHOOK_SECRET || ''
   },
 
   frontendUrl: process.env.FRONTEND_URL || 'http://localhost:5173',

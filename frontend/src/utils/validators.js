@@ -27,18 +27,6 @@ export function isValidIndianPhone(phone) {
 }
 
 /**
- * Validate Indian PAN card format (ABCDE1234F)
- * Essential for Section 80G tax benefit donation receipt
- * @param {string} pan 
- * @returns {boolean}
- */
-export function isValidPAN(pan) {
-  if (!pan) return false;
-  const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
-  return panRegex.test(String(pan).trim().toUpperCase());
-}
-
-/**
  * Validate minimum password strength
  * @param {string} password 
  * @returns {{ valid: boolean, message: string }}

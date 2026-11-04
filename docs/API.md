@@ -74,7 +74,7 @@ All client or server errors return appropriate HTTP status codes (`400`, `401`, 
         "id": "u_101",
         "full_name": "Sita Sharma",
         "email": "sita@example.com",
-        "role": "DONOR"
+        "role": "MEMBER"
       },
       "access_token": "eyJhbGciOi...",
       "refresh_token": "eyJhbGciOi..."
@@ -143,7 +143,7 @@ All client or server errors return appropriate HTTP status codes (`400`, `401`, 
       "full_name": "Sita Sharma",
       "email": "sita@example.com",
       "phone": "9876543210",
-      "role": "DONOR",
+      "role": "MEMBER",
       "created_at": "2026-03-01T10:00:00Z"
     }
   }
@@ -175,8 +175,6 @@ All client or server errors return appropriate HTTP status codes (`400`, `401`, 
         "summary": "Installing rooftop solar systems in 25 off-grid village schools.",
         "category_name": "Renewable Energy",
         "category_slug": "renewable-energy",
-        "target_amount": 500000,
-        "raised_amount": 320000,
         "status": "ACTIVE",
         "hero_image_url": "/uploads/projects/solar-school.jpg",
         "created_at": "2026-01-15T08:00:00Z"
@@ -205,9 +203,6 @@ All client or server errors return appropriate HTTP status codes (`400`, `401`, 
       "slug": "solar-lighting-rural-schools",
       "description": "Full markdown or rich text project explanation...",
       "category_name": "Renewable Energy",
-      "target_amount": 500000,
-      "raised_amount": 320000,
-      "donor_count": 48,
       "status": "ACTIVE",
       "beneficiaries": "1,200 rural students",
       "location": "Sundargarh & Keonjhar Districts",
@@ -241,7 +236,7 @@ All client or server errors return appropriate HTTP status codes (`400`, `401`, 
 ### 3.5 Soft-Delete Project
 - **Endpoint:** `DELETE /api/v1/projects/:id`
 - **Auth:** Bearer Token (`ADMIN`)
-- **Note:** Marks `is_deleted = true` to preserve donation integrity.
+- **Note:** Marks `is_deleted = true` to preserve project history.
 
 ### 3.6 List Project Categories
 - **Endpoint:** `GET /api/v1/categories`
@@ -263,136 +258,9 @@ All client or server errors return appropriate HTTP status codes (`400`, `401`, 
 
 ---
 
-## 4. Donations & Payment Gateway APIs (`/api/v1/donations`, `/api/v1/payments`)
+## 4. Donations
 
-QR-only deployments use the manual submission flow below. The legacy gateway endpoints remain available for installations that explicitly configure gateway credentials; the public frontend uses the QR workflow.
-
-### 4.1 Submit a UPI QR Transfer for Reconciliation
-- **Endpoint:** `POST /api/v1/donations/manual`
-- **Auth:** Public / Optional Bearer Token
-- **Request Body:**
-  ```json
-  {
-    "amount": 2500,
-    "donorName": "Aarav Gupta",
-    "donorEmail": "aarav@example.com",
-    "donorPhone": "9876543210",
-    "paymentReference": "UPI123456789012",
-    "require80G": false
-  }
-  ```
-- **Response (`201 Created`):**
-  ```json
-  {
-    "success": true,
-    "message": "Donation submitted for payment reconciliation",
-    "data": {
-      "donation_id": "uuid",
-      "amount": "2500.00",
-      "currency": "INR",
-      "status": "PENDING",
-      "payment_method": "UPI_QR"
-    }
-  }
-  ```
-- Submission is not proof of payment. Only an administrator matching the reference and amount against bank records may confirm it.
-
-### 4.2 Create Payment Order (Legacy Gateway)
-- **Endpoint:** `POST /api/v1/donations/create-order`
-- **Auth:** Public / Optional Bearer Token
-- **Request Body:**
-  ```json
-  {
-    "amount": 2500,
-    "currency": "INR",
-    "donor_name": "Aarav Gupta",
-    "donor_email": "aarav@example.com",
-    "donor_phone": "9876543210",
-    "donor_pan": "ABCDE1234F",
-    "donor_address": "12 Gandhi Nagar, Cuttack, Odisha",
-    "project_id": "p_01",
-    "is_anonymous": false
-  }
-  ```
-- **Response (`201 Created`):**
-  ```json
-  {
-    "success": true,
-    "message": "Donation order created",
-    "data": {
-      "donation_id": "don_9823",
-      "order_id": "order_H76gHk9jKlL",
-      "amount": 250000,
-      "currency": "INR",
-      "key_id": "rzp_test_public_key"
-    }
-  }
-  ```
-
-### 4.3 Verify Payment (Server-Side Gateway Verification)
-- **Endpoint:** `POST /api/v1/donations/verify`
-- **Auth:** Public
-- **Request Body:**
-  ```json
-  {
-    "donation_id": "don_9823",
-    "razorpay_order_id": "order_H76gHk9jKlL",
-    "razorpay_payment_id": "pay_Klj8899812",
-    "razorpay_signature": "e89cbf7689a..."
-  }
-  ```
-- **Response (`200 OK`):**
-  ```json
-  {
-    "success": true,
-    "message": "Payment verified successfully. Thank you for your contribution!",
-    "data": {
-      "donation_id": "don_9823",
-      "receipt_number": "SECT/2026-27/00142",
-      "status": "COMPLETED",
-      "amount": 2500,
-      "currency": "INR",
-      "donor_name": "Aarav Gupta",
-      "is_80g_eligible": true,
-      "payment_date": "2026-03-08T11:45:00Z"
-    }
-  }
-  ```
-- The backend verifies the checkout HMAC, confirms that the order belongs to the
-  specified donation, then retrieves the payment from Razorpay and checks its
-  captured status, amount, currency, and order before issuing a receipt.
-
-### 4.4 Payment Gateway Webhook (Authoritative & Idempotent)
-- **Endpoint:** `POST /api/v1/payments/webhook`
-- **Auth:** Webhook HMAC-SHA256 signature in `X-Razorpay-Signature`
-- **Payload:** Raw Gateway Webhook Event
-- **Processing:** Rejects invalid signatures in every environment, validates the
-  captured payment against the stored order, then runs an atomic transaction to
-  record payment, mark the donation `COMPLETED`, and issue the receipt.
-
-### 4.5 Get Donation 80G Tax Receipt
-- **Endpoint:** `GET /api/v1/donations/:id/receipt`
-- **Auth:** Bearer Token; donor must own the donation, or caller must have the `ADMIN` role.
-- **Response (`200 OK`):**
-  ```json
-  {
-    "success": true,
-    "message": "Receipt details retrieved",
-    "data": {
-      "receipt_number": "SECT/2026-27/00142",
-      "trust_name": "Saraswati Educational & Charitable Trust (SECT)",
-      "trust_registration_no": null,
-      "tax_exemption_80g_no": null,
-      "donor_name": "Aarav Gupta",
-      "donor_pan": "ABCDE1234F",
-      "amount": 2500,
-      "amount_in_words": "Rupees Two Thousand Five Hundred Only",
-      "payment_mode": "ONLINE_GATEWAY",
-      "transaction_id": "pay_Klj8899812",
-      "date": "2026-03-08T11:45:00Z"
-    }
-  }
-  ```
+The public website displays a static SECT UPI QR code. Payments are made outside this API; it has no donation submission, payment, reconciliation, or receipt endpoints and does not store donation records.
 
 ---
 
@@ -448,38 +316,18 @@ QR-only deployments use the manual submission flow below. The legacy gateway end
 
 ---
 
-## 7. Admin & Reporting APIs (`/api/v1/admin`, `/api/v1/reports`)
+## 7. Admin APIs (`/api/v1/admin`)
 
 ### 7.1 Admin Overview Metrics
-- **Endpoint:** `GET /api/v1/admin/stats`
-- **Auth:** Bearer Token (`ADMIN`)
-- **Response (`200 OK`):**
-  ```json
-  {
-    "success": true,
-    "message": "Admin metrics retrieved",
-    "data": {
-      "total_donations_amount": 1845000,
-      "total_donors_count": 312,
-      "active_projects_count": 6,
-      "pending_inquiries_count": 9,
-      "recent_donations": []
-    }
-  }
-  ```
+- `GET /api/v1/admin/stats` — Returns active project and pending inquiry counts.
 
-### 7.2 UPI Reconciliation
-- `GET /api/v1/admin/donations?status=PENDING` — List donation submissions for administrators.
-- `PATCH /api/v1/admin/donations/:id/confirm` — Confirm a pending UPI submission after bank statement verification; atomically completes the donation, updates project totals, and issues a receipt. Repeating confirmation is idempotent.
-- `PATCH /api/v1/admin/donations/:id/reject` — Reject a pending UPI submission without issuing a receipt.
+### 7.2 Admin User Management
+- `GET /api/v1/admin/users` — List users with an optional role filter.
+- `PATCH /api/v1/admin/users/:id/role` — Update user role (`ADMIN`, `STAFF`, `MEMBER`, `VOLUNTEER`).
 
-### 7.3 Admin User Management
-- `GET /api/v1/admin/users` — List users with role filter.
-- `PATCH /api/v1/admin/users/:id/role` — Update user role (`ADMIN`, `STAFF`, `MEMBER`, `DONOR`).
-
-### 7.4 Financial & 80G Reports
-- `GET /api/v1/reports/donations?from=2026-01-01&to=2026-03-31` — Donation ledger.
-- `GET /api/v1/reports/80g?financial_year=2025-26` — Exportable donor tax dataset.
+### 7.3 Inquiry Management
+- `GET /api/v1/admin/inquiries` — List public inquiries.
+- `PATCH /api/v1/admin/inquiries/:id/status` — Update inquiry status.
 
 ---
 

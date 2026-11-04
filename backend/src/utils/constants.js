@@ -8,7 +8,6 @@ module.exports = {
     ADMIN: 'ADMIN',
     STAFF: 'STAFF',
     MEMBER: 'MEMBER',
-    DONOR: 'DONOR',
     VOLUNTEER: 'VOLUNTEER'
   },
 
@@ -17,19 +16,6 @@ module.exports = {
     ACTIVE: 'ACTIVE',
     COMPLETED: 'COMPLETED',
     ARCHIVED: 'ARCHIVED'
-  },
-
-  DONATION_STATUS: {
-    PENDING: 'PENDING',
-    COMPLETED: 'COMPLETED',
-    FAILED: 'FAILED',
-    REFUNDED: 'REFUNDED'
-  },
-
-  PAYMENT_STATUS: {
-    CREATED: 'CREATED',
-    CAPTURED: 'CAPTURED',
-    FAILED: 'FAILED'
   },
 
   INQUIRY_STATUS: {

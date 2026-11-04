@@ -66,14 +66,16 @@ npm run dev
 ```
 
 Seed fixtures are inserted only when their target tables are empty. Existing project,
-news, event, document, trust-profile, and donation data is preserved; rerunning the
+news, event, and document data is preserved; rerunning the
 seed command skips fixture scripts for tables that already contain records.
 
 For local development, PostgreSQL credentials are only needed when connecting to an
 external instance; set `USE_EMBEDDED_DB=true` to explicitly use local PGlite storage.
 Production requires separate runtime/migration PostgreSQL URLs, distinct high-entropy
-JWT secrets, and an HTTPS `FRONTEND_URL`. Donors report UPI references; an admin must
-verify bank records before the application marks a donation complete or issues a receipt.
+JWT secrets, and an HTTPS `FRONTEND_URL`. Donations are made directly with the QR code;
+the application does not process payments or store donation records.
+Migration `012_remove_donation_and_payment_data.sql` removes legacy donation/payment
+records and contribution-related personal/funding fields from existing databases.
 The API refuses to start
 when required production settings are absent or contain example placeholders. Database
 TLS certificate validation is enabled in production; set `DATABASE_SSL_CA` when the
@@ -87,9 +89,8 @@ characters with uppercase, lowercase, a number, and a symbol). The command refus
 to elevate an existing account. Remove the bootstrap password from the deployment
 environment after it completes.
 
-Email delivery is not currently configured: the application stores inquiries and
-donations, but it does not send receipt or inquiry-notification email. Choose and
-configure an email provider before advertising email delivery to donors.
+Email delivery is not currently configured. Choose and configure an email provider
+before advertising email delivery for inquiries.
 
 ## Continuous Integration
 
@@ -104,14 +105,14 @@ npm run build:frontend
 
 ## Production Deployment
 
-The repository includes Railway service Dockerfiles and a Docker Compose deployment; see the release runbook in [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md). Production needs a TLS-enabled managed PostgreSQL database, separate application/migration roles, persistent upload-volume backups, and an approved donation workflow.
+The repository includes Railway service Dockerfiles and a Docker Compose deployment; see the release runbook in [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md). Production needs a TLS-enabled managed PostgreSQL database, separate application/migration roles, persistent upload-volume backups, and a verified public QR code.
 
 The API is available at `http://localhost:5000/api/v1`.
 
 ## Team Ownership
 
-- **Suchitra:** Backend API, PostgreSQL database, JWT authentication, RBAC, payments, webhooks, and 80G receipts.
-- **Mrinmayee:** React frontend, public and admin UI, API integration, and donation flow.
+- **Suchitra:** Backend API, PostgreSQL database, JWT authentication, and RBAC.
+- **Mrinmayee:** React frontend, public and admin UI, API integration, and QR donation page.
 - **Developer 3:** QA, DevOps, CI/CD, and deployment.
 
 ---

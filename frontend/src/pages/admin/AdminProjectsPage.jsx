@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Edit2, Trash2 } from 'lucide-react';
 import { projectApi } from '../../api/projectApi';
-import { formatINR, calculateProgress } from '../../utils/formatters';
 import { Spinner } from '../../components/common/Loader';
 import Modal from '../../components/common/Modal';
 import Input from '../../components/common/Input';
@@ -20,7 +19,6 @@ export default function AdminProjectsPage() {
   const [formData, setFormData] = useState({
     title: '',
     categoryId: '1',
-    targetAmount: '',
     shortDescription: '',
     imageUrl: '',
   });
@@ -54,7 +52,6 @@ export default function AdminProjectsPage() {
     setFormData({
       title: '',
       categoryId: categories[0]?.id || '1',
-      targetAmount: '',
       shortDescription: '',
       imageUrl: '',
     });
@@ -66,7 +63,6 @@ export default function AdminProjectsPage() {
     setFormData({
       title: proj.title,
       categoryId: proj.categoryId || '1',
-      targetAmount: proj.targetAmount,
       shortDescription: proj.shortDescription,
       imageUrl: proj.imageUrl || '',
     });
@@ -86,7 +82,7 @@ export default function AdminProjectsPage() {
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.title || !formData.targetAmount) {
+    if (!formData.title || !formData.shortDescription) {
       showError('Please fill in required fields');
       return;
     }
@@ -97,7 +93,6 @@ export default function AdminProjectsPage() {
           title: formData.title,
           summary: formData.shortDescription,
           description: formData.shortDescription,
-          target_amount: Number(formData.targetAmount),
           category_id: formData.categoryId ? Number(formData.categoryId) : undefined,
           hero_image_url: formData.imageUrl
         });
@@ -107,7 +102,6 @@ export default function AdminProjectsPage() {
           title: formData.title,
           summary: formData.shortDescription,
           description: formData.shortDescription,
-          target_amount: Number(formData.targetAmount),
           category_id: formData.categoryId ? Number(formData.categoryId) : 1,
           hero_image_url: formData.imageUrl || 'https://thumbs.dreamstime.com/b/group-students-community-members-gathers-outside-school-solar-panels-its-roof-sustainable-finance-project-349517027.jpg',
           location: 'Odisha'
@@ -128,7 +122,7 @@ export default function AdminProjectsPage() {
         <div>
           <h2 style={{ fontSize: '1.6rem', color: 'var(--color-slate-900)' }}>Project Management</h2>
           <p style={{ color: 'var(--color-slate-500)', fontSize: '0.9rem' }}>
-            Create and maintain community campaigns, funding targets, and progress counters.
+            Create and maintain community projects.
           </p>
         </div>
         <Button variant="primary" icon={Plus} onClick={handleOpenCreate}>
@@ -145,17 +139,12 @@ export default function AdminProjectsPage() {
               <tr>
                 <th>Project Title</th>
                 <th>Category</th>
-                <th>Target Goal</th>
-                <th>Raised</th>
-                <th>Progress</th>
                 <th>Status</th>
                 <th style={{ textAlign: 'right' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {projects.map((p) => {
-                const prog = calculateProgress(p.raisedAmount, p.targetAmount);
-                return (
+              {projects.map((p) => (
                   <tr key={p.id}>
                     <td>
                       <div style={{ fontWeight: 600, color: 'var(--color-slate-900)' }}>{p.title}</div>
@@ -163,14 +152,6 @@ export default function AdminProjectsPage() {
                     </td>
                     <td>
                       <span className="badge badge-emerald">{p.category}</span>
-                    </td>
-                    <td style={{ fontWeight: 600 }}>{formatINR(p.targetAmount)}</td>
-                    <td style={{ fontWeight: 700, color: 'var(--color-primary-700)' }}>{formatINR(p.raisedAmount)}</td>
-                    <td style={{ minWidth: '120px' }}>
-                      <div style={{ fontSize: '0.78rem', fontWeight: 600, marginBottom: '0.2rem' }}>{prog}%</div>
-                      <div className="progress-bar-wrap" style={{ margin: 0, height: '6px' }}>
-                        <div className="progress-bar-fill" style={{ width: `${prog}%` }} />
-                      </div>
                     </td>
                     <td>
                       <span className="badge badge-success">{p.status || 'ACTIVE'}</span>
@@ -196,8 +177,7 @@ export default function AdminProjectsPage() {
                       </div>
                     </td>
                   </tr>
-                );
-              })}
+              ))}
             </tbody>
           </table>
         </div>
@@ -233,15 +213,6 @@ export default function AdminProjectsPage() {
               ))}
             </select>
           </div>
-
-          <Input
-            label="Target Funding Amount (INR ₹)"
-            type="number"
-            placeholder="e.g. 1000000"
-            value={formData.targetAmount}
-            onChange={(e) => setFormData({ ...formData, targetAmount: e.target.value })}
-            required
-          />
 
           <Input
             label="Image URL (Unsplash or CDN)"

@@ -10,12 +10,9 @@ function normalizeProject(p) {
     slug: p.slug,
     shortDescription: p.shortDescription || p.summary || '',
     description: p.description || p.summary || '',
-    raisedAmount: Number(p.raisedAmount || p.raised_amount || 0),
-    targetAmount: Number(p.targetAmount || p.target_amount || 0),
     imageUrl: projectImage || '',
     category: p.category || p.category_name || '',
     categoryId: p.categoryId || p.category_id || '',
-    donorCount: p.donorCount ?? p.donor_count,
     impactMetrics: p.impactMetrics || p.impact_metrics || []
   };
 }
