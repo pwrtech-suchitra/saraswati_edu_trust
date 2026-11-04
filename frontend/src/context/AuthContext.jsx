@@ -44,10 +44,6 @@ export function AuthProvider({ children }) {
     return res;
   };
 
-  const register = async (data) => {
-    return await authApi.register(data);
-  };
-
   const logout = async () => {
     try {
       await authApi.logout();
@@ -70,7 +66,6 @@ export function AuthProvider({ children }) {
         isAdmin,
         loading,
         login,
-        register,
         logout,
       }}
     >

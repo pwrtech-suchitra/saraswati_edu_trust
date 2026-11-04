@@ -7,7 +7,6 @@ import {
   Calendar,
   ShieldCheck,
   Share2,
-  CheckCircle2
 } from 'lucide-react';
 import { projectApi } from '../../api/projectApi';
 import { formatINR, calculateProgress, formatDate } from '../../utils/formatters';
@@ -95,12 +94,12 @@ export default function ProjectDetailPage() {
             <span>All Projects</span>
           </Link>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.85rem' }}>
-            <span className="badge badge-emerald" style={{ backgroundColor: 'rgba(255,255,255,0.15)', color: '#fef08a' }}>
+            {project.category && <span className="badge badge-emerald" style={{ backgroundColor: 'rgba(255,255,255,0.15)', color: '#fef08a' }}>
               {project.category}
-            </span>
-            <span style={{ fontSize: '0.85rem', color: 'var(--color-slate-300)' }}>
+            </span>}
+            {project.status && <span style={{ fontSize: '0.85rem', color: 'var(--color-slate-300)' }}>
               Status: {project.status}
-            </span>
+            </span>}
           </div>
           <h1 style={{ color: 'white', fontSize: 'clamp(1.75rem, 3.5vw, 2.75rem)' }}>
             {project.title}
@@ -154,24 +153,6 @@ export default function ProjectDetailPage() {
               </div>
             )}
 
-            {/* Implementation Details */}
-            <div className="card card-padded" style={{ backgroundColor: 'var(--color-slate-50)' }}>
-              <h4 style={{ marginBottom: '0.75rem' }}>Execution & Monitoring by SECT</h4>
-              <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.65rem', fontSize: '0.92rem', color: 'var(--color-slate-600)' }}>
-                <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <CheckCircle2 size={16} color="var(--color-primary-600)" />
-                  <span>Direct implementation by local field coordinators; no third-party brokers</span>
-                </li>
-                <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <CheckCircle2 size={16} color="var(--color-primary-600)" />
-                  <span>Bi-annual audited expenditure statements available on portal</span>
-                </li>
-                <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <CheckCircle2 size={16} color="var(--color-primary-600)" />
-                  <span>Eligible for Section 80G tax certificate upon donation confirmation</span>
-                </li>
-              </ul>
-            </div>
           </div>
 
           {/* Right: Funding Progress Card & Direct Action */}
@@ -214,13 +195,13 @@ export default function ProjectDetailPage() {
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.88rem', fontWeight: 600 }}>
                   <span style={{ color: 'var(--color-primary-700)' }}>{progress}% Complete</span>
                   <span style={{ color: 'var(--color-slate-600)', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                    <Users size={15} /> {project.donorCount || 0} Donors
+                    {project.donorCount !== undefined && project.donorCount !== null && <><Users size={15} /> {project.donorCount} Donors</>}
                   </span>
                 </div>
               </div>
 
               {/* Timeline Info */}
-              <div
+              {(project.startDate || project.endDate) && <div
                 style={{
                   borderTop: '1px solid var(--color-slate-200)',
                   borderBottom: '1px solid var(--color-slate-200)',
@@ -235,7 +216,7 @@ export default function ProjectDetailPage() {
               >
                 <Calendar size={16} color="var(--color-amber-600)" />
                 <span>Campaign Window: {formatDate(project.startDate)} to {formatDate(project.endDate)}</span>
-              </div>
+              </div>}
 
               {/* Action */}
               <Link to={`/donate?project=${project.id}`} style={{ width: '100%' }}>
@@ -256,7 +237,7 @@ export default function ProjectDetailPage() {
                 }}
               >
                 <ShieldCheck size={16} />
-                <span>Eligible for 50% 80G Tax Exemption</span>
+                <span>UPI transfers are confirmed against Trust bank records</span>
               </div>
             </div>
           </div>

@@ -8,6 +8,35 @@ const fs = require('fs');
 const path = require('path');
 const db = require('../backend/src/config/db');
 
+const destructiveSeedTables = {
+  '004_projects_seed.sql': ['projects', 'project_images', 'project_updates'],
+  '005_news_and_events_seed.sql': ['news_articles', 'events', 'event_registrations'],
+  '006_documents_and_media_seed.sql': ['documents', 'media_files'],
+  '007_trust_profile_seed.sql': ['trust_profile'],
+  '008_donations_seed.sql': [
+    'donations',
+    'donation_receipts',
+    'payment_transactions',
+    'payment_orders'
+  ]
+};
+
+async function shouldSkipSeed(file, client) {
+  const tables = destructiveSeedTables[file] || [];
+
+  for (const table of tables) {
+    const result = await client.query(
+      `SELECT EXISTS (SELECT 1 FROM ${table} LIMIT 1) AS has_data`
+    );
+    if (result.rows[0].has_data) {
+      console.warn(`[Seed] Skipping ${file}; ${table} already contains data.`);
+      return true;
+    }
+  }
+
+  return false;
+}
+
 async function runMigrations() {
   const client = await db.getClient();
   console.log('[Migration] Database client acquired...');
@@ -50,6 +79,9 @@ async function runMigrations() {
         .sort();
 
       for (const file of seedFiles) {
+        if (await shouldSkipSeed(file, client)) {
+          continue;
+        }
         console.log(`[Seed] Executing: ${file}`);
         const sql = fs.readFileSync(path.join(seedsDir, file), 'utf-8');
         await (client.exec ? client.exec(sql) : client.query(sql));
@@ -72,4 +104,4 @@ if (require.main === module) {
   runMigrations();
 }
 
-module.exports = { runMigrations };
+module.exports = { runMigrations, shouldSkipSeed };

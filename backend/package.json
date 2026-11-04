@@ -8,6 +8,7 @@
     "dev": "node --watch src/server.js",
     "migrate": "node ../database/migrate.js",
     "migrate:seed": "node ../database/migrate.js --seed",
+    "admin:create": "node scripts/createAdmin.js",
     "test": "node --test --test-concurrency=1 ../tests/backend/*.test.js"
   },
   "keywords": [
@@ -22,17 +23,17 @@
   "author": "Suchitra Mishra",
   "license": "ISC",
   "dependencies": {
-    "@electric-sql/pglite": "^0.5.9",
-    "bcryptjs": "^2.4.3",
+    "@electric-sql/pglite": "^0.5.10",
+    "bcryptjs": "^3.0.3",
     "cors": "^2.8.5",
-    "dotenv": "^16.4.5",
-    "express": "^4.21.2",
-    "express-rate-limit": "^7.5.0",
+    "dotenv": "^18.0.8",
+    "express": "^5.3.0",
+    "express-rate-limit": "^8.7.1",
     "helmet": "^8.0.0",
     "jsonwebtoken": "^9.0.2",
-    "morgan": "^1.10.0",
-    "multer": "^1.4.5-lts.1",
-    "pg": "^8.13.1",
-    "zod": "^3.24.1"
+    "morgan": "^1.12.1",
+    "multer": "^2.4.0",
+    "pg": "^8.23.1",
+    "zod": "^4.6.7"
   }
 }

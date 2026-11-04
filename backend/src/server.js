@@ -3,28 +3,55 @@
  * Author: Suchitra (Backend & Database Developer)
  */
 
+// Railway's pre-deploy migration uses this credential; the running API must not.
+delete process.env.MIGRATION_DATABASE_URL;
+
 const app = require('./app');
 const config = require('./config/env');
 const db = require('./config/db');
 const logger = require('./config/logger');
 
-const server = app.listen(config.port, async () => {
-  logger.info(`SECT Backend API running on port ${config.port} [${config.nodeEnv}]`);
-  logger.info(`Allowing CORS requests from: ${config.frontendUrl}`);
-
-  // Test database connection
+async function startServer() {
   const dbHealth = await db.testConnection();
   if (dbHealth.ok) {
-    logger.info('PostgreSQL Database connected successfully.');
+    logger.info(`Database connected successfully (${dbHealth.engine}).`);
   } else {
-    logger.warn('PostgreSQL Database connection warning: ' + dbHealth.error);
-    logger.warn('Please check DATABASE_URL in backend/.env');
+    logger.error(`Database connection failed: ${dbHealth.error}`);
+    if (config.nodeEnv === 'production') {
+      process.exitCode = 1;
+      return null;
+    }
+    logger.warn('The API is starting without a healthy database connection.');
   }
+
+  const server = app.listen(config.port, () => {
+    logger.info(`SECT Backend API running on port ${config.port} [${config.nodeEnv}]`);
+    logger.info(`Allowing CORS requests from: ${config.frontendUrl}`);
+  });
+
+  server.on('error', (error) => {
+    logger.error('HTTP server failed to start.', error);
+    process.exitCode = 1;
+  });
+
+  return server;
+}
+
+const serverPromise = startServer().catch((error) => {
+  logger.error('Backend startup failed.', error);
+  process.exitCode = 1;
+  return null;
 });
 
 // Graceful Shutdown
-function handleShutdown(signal) {
+async function handleShutdown(signal) {
   logger.info(`Received ${signal}. Shutting down gracefully...`);
+  const server = await serverPromise;
+  if (!server) {
+    await db.pool.end();
+    return;
+  }
+
   server.close(async () => {
     logger.info('HTTP server closed.');
     await db.pool.end();
@@ -33,7 +60,7 @@ function handleShutdown(signal) {
   });
 }
 
-process.on('SIGTERM', () => handleShutdown('SIGTERM'));
-process.on('SIGINT', () => handleShutdown('SIGINT'));
+process.on('SIGTERM', () => void handleShutdown('SIGTERM'));
+process.on('SIGINT', () => void handleShutdown('SIGINT'));
 
-module.exports = server;
+module.exports = serverPromise;

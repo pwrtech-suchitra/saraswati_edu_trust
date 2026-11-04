@@ -1,0 +1,1 @@
+export const DONOR_CONTACT_PHONE = '9437155337';

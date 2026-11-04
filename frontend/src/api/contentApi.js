@@ -10,13 +10,18 @@ function normalizeNews(n) {
     summary: n.summary || n.excerpt || '',
     content: n.content || n.excerpt || '',
     date: n.date || n.published_at || '',
-    imageUrl: n.imageUrl || n.image_url || '/mission_sustainable_india.jpg',
-    category: n.category || 'Initiative'
+    imageUrl: n.imageUrl || n.image_url || '',
+    category: n.category || ''
   };
 }
 
 function normalizeEvent(e) {
   if (!e) return null;
+  const capacity = Number(e.max_participants ?? e.maxParticipants);
+  const registeredCount = Number(e.registered_count ?? e.registeredCount ?? 0);
+  const remainingSeats = Number.isFinite(capacity) && capacity > 0
+    ? Math.max(capacity - registeredCount, 0)
+    : null;
   return {
     ...e,
     id: e.id,
@@ -24,9 +29,9 @@ function normalizeEvent(e) {
     slug: e.slug,
     description: e.description || '',
     date: e.date || e.event_date || '',
-    time: e.time || '10:00 AM - 04:00 PM',
-    location: e.location || 'Bhubaneswar, Odisha',
-    seatsAvailable: e.seatsAvailable !== undefined ? e.seatsAvailable : (e.max_participants || 50),
+    time: e.time || e.event_time || '',
+    location: e.location || '',
+    seatsAvailable: e.seatsAvailable ?? e.seats_available ?? remainingSeats,
     imageUrl: e.imageUrl || e.hero_image_url || ''
   };
 }
@@ -37,10 +42,11 @@ function normalizeDocument(d) {
     ...d,
     id: d.id,
     title: d.title,
-    year: d.year || '2025',
-    type: d.type || (d.doc_type ? d.doc_type.replace(/_/g, ' ') : 'PDF'),
-    size: d.size || (d.file_size_kb ? `${(d.file_size_kb / 1024).toFixed(1)} MB` : '1.2 MB'),
-    fileUrl: d.fileUrl || d.file_url || '#'
+    year: d.year || '',
+    type: d.type || (d.doc_type ? d.doc_type.replace(/_/g, ' ') : ''),
+    size: d.size || (d.file_size_kb ? `${(d.file_size_kb / 1024).toFixed(1)} MB` : ''),
+    fileUrl: d.fileUrl || d.file_url || '',
+    fileAvailable: Boolean(d.file_available)
   };
 }
 
@@ -50,7 +56,7 @@ function normalizeGallery(m) {
     ...m,
     id: m.id,
     title: m.title,
-    category: m.category || 'Initiative',
+    category: m.category || '',
     imageUrl: m.imageUrl || m.file_url || '',
     caption: m.caption || ''
   };
@@ -64,6 +70,17 @@ export const contentApi = {
     const res = await axiosClient.get('/news');
     if (res && Array.isArray(res.data)) {
       res.data = res.data.map(normalizeNews);
+    }
+    return res;
+  },
+
+  /**
+   * Get a complete published news article by ID or slug
+   */
+  async getNewsArticle(id) {
+    const res = await axiosClient.get(`/news/${encodeURIComponent(id)}`);
+    if (res?.data) {
+      res.data = normalizeNews(res.data);
     }
     return res;
   },

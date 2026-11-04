@@ -9,16 +9,30 @@ const config = require('../config/env');
 const ApiResponse = require('../utils/apiResponse');
 
 function errorHandler(err, req, res, next) {
+  if (res.headersSent) {
+    return next(err);
+  }
+
   logger.error(`[Unhandled Error] ${req.method} ${req.originalUrl}: ${err.message}`, err);
+
+  if (err.type === 'entity.parse.failed') {
+    return ApiResponse.error(res, 'Request body contains invalid JSON.', [], 400);
+  }
+
+  if (err.type === 'entity.too.large') {
+    return ApiResponse.error(res, 'Request body is too large.', [], 413);
+  }
 
   // PostgreSQL unique violation
   if (err.code === '23505') {
-    return ApiResponse.error(res, 'A record with this unique value already exists.', [{ detail: err.detail }], 409);
+    const errors = config.nodeEnv === 'production' ? [] : [{ detail: err.detail }];
+    return ApiResponse.error(res, 'A record with this unique value already exists.', errors, 409);
   }
 
   // PostgreSQL foreign key violation
   if (err.code === '23503') {
-    return ApiResponse.error(res, 'Referenced record does not exist.', [{ detail: err.detail }], 400);
+    const errors = config.nodeEnv === 'production' ? [] : [{ detail: err.detail }];
+    return ApiResponse.error(res, 'Referenced record does not exist.', errors, 400);
   }
 
   // Multer file upload error
@@ -26,7 +40,10 @@ function errorHandler(err, req, res, next) {
     return ApiResponse.error(res, `Upload error: ${err.message}`, [{ code: err.code }], 400);
   }
 
-  const statusCode = err.statusCode || (res.statusCode !== 200 ? res.statusCode : 500);
+  const requestedStatus = err.statusCode || err.status;
+  const statusCode = Number.isInteger(requestedStatus) && requestedStatus >= 400 && requestedStatus <= 599
+    ? requestedStatus
+    : (res.statusCode >= 400 && res.statusCode <= 599 ? res.statusCode : 500);
   const message = err.isOperational || config.nodeEnv !== 'production'
     ? err.message
     : 'Internal server error. Please try again later.';

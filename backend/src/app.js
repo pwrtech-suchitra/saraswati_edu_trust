@@ -15,6 +15,8 @@ const ApiResponse = require('./utils/apiResponse');
 
 const app = express();
 
+app.set('trust proxy', config.trustProxyHops);
+
 // 1. Security (Helmet + CORS)
 configureSecurity(app);
 

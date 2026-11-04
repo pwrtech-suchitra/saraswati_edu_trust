@@ -3,13 +3,7 @@
  * Author: Suchitra (Backend & Database Developer)
  */
 
-let rateLimit;
-try {
-  rateLimit = require('express-rate-limit');
-} catch {
-  // Graceful fallback if dependency is being installed
-  rateLimit = () => (req, res, next) => next();
-}
+const rateLimit = require('express-rate-limit');
 
 // General API rate limiter
 const generalLimiter = rateLimit({

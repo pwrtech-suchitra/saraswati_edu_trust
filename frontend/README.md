@@ -1,16 +1,38 @@
-# React + Vite
+# SECT Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+The SECT public website and administration interface is a React single-page application. Webpack compiles the React entry point and bundles the production assets.
 
-Currently, two official plugins are available:
+## Development
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+From the repository root, install dependencies and start the frontend:
 
-## React Compiler
+```bash
+npm --prefix frontend install
+npm run dev:frontend
+```
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+The Webpack development server runs at `http://localhost:3000` and proxies API
+and upload requests to `http://localhost:5000` by default. Set
+`REACT_APP_API_PROXY_TARGET` in `frontend/.env` to use a different development
+backend. Set `REACT_APP_API_BASE_URL` when the deployed API uses a different
+origin; leave it unset to use the same-origin `/api/v1` path.
 
-## Expanding the Oxlint configuration
+Browsing the public site, contacting the Trust, and donating do not require an
+account. The only sign-in page is reserved for authorized staff in the admin portal.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+## Validation
+
+```bash
+npm run build:frontend
+npm run lint:frontend
+```
+
+`src/main.jsx` is the React entry point and `webpack.config.cjs` defines the
+project's development and production bundles. `index.html` supplies the page
+shell and Webpack injects the compiled scripts. `npm run build` generates the
+deployable static site in `frontend/dist/`; this output is generated and
+intentionally excluded from Git. `npm start` builds the site and serves the
+static output locally for verification. Production deployments serve the
+generated files with the Nginx container defined in `deploy/compose.production.yaml`.
+
+See the root [README](../README.md) for full-stack setup and database instructions.

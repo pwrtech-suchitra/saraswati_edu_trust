@@ -58,7 +58,7 @@ async function listEvents(req, res, next) {
         id, title, slug, description, event_date, location, is_virtual, max_participants, hero_image_url,
         (SELECT COUNT(*) FROM event_registrations WHERE event_id = events.id) as registered_count
       FROM events
-      WHERE is_active = TRUE
+      WHERE is_active = TRUE AND event_date >= CURRENT_TIMESTAMP
       ORDER BY event_date ASC
     `);
     return ApiResponse.success(res, 'Events retrieved', result.rows);

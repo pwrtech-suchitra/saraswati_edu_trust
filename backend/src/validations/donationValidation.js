@@ -40,6 +40,16 @@ const createDonationOrderSchema = z.object({
 }).refine(data => Boolean(data.donor_email || data.donorEmail), {
   message: 'Valid donor email is required',
   path: ['donor_email']
+}).refine(data => {
+  const is80GClaimed = data.is_80g_claimed !== undefined
+    ? data.is_80g_claimed
+    : data.require80G !== undefined
+      ? data.require80G
+      : false;
+  return !is80GClaimed || Boolean(data.donor_pan || data.donorPan);
+}, {
+  message: 'Donor PAN is required when requesting 80G documentation',
+  path: ['donor_pan']
 }).transform(data => ({
   amount: data.amount,
   currency: data.currency || 'INR',
@@ -50,7 +60,33 @@ const createDonationOrderSchema = z.object({
   donor_address: data.donor_address || data.donorAddress || null,
   project_id: data.project_id || data.projectId || null,
   is_anonymous: data.is_anonymous || data.isAnonymous || false,
-  is_80g_claimed: data.is_80g_claimed !== undefined ? data.is_80g_claimed : (data.require80G !== undefined ? data.require80G : true)
+  is_80g_claimed: data.is_80g_claimed !== undefined ? data.is_80g_claimed : (data.require80G !== undefined ? data.require80G : false)
+}));
+
+const createManualDonationSchema = z.object({
+  amount: z.coerce.number().finite().min(50, 'Minimum donation amount is ₹50'),
+  donorName: z.string().trim().min(2).max(150),
+  donorEmail: z.string().trim().email().max(255),
+  donorPhone: z.string().trim().regex(/^(\+91[\s-]?)?[6-9]\d{9}$/).optional().nullable().or(z.literal('')),
+  donorPan: z.string().trim().toUpperCase().regex(/^[A-Z]{5}[0-9]{4}[A-Z]$/).optional().nullable().or(z.literal('')),
+  donorAddress: z.string().trim().max(1000).optional().nullable(),
+  paymentReference: z.string().trim().min(6).max(100).regex(/^[A-Za-z0-9_-]+$/),
+  projectId: z.string().uuid().optional().nullable(),
+  require80G: z.boolean().optional().default(false)
+}).refine((data) => !data.require80G || Boolean(data.donorPan), {
+  message: 'A valid PAN is required when requesting 80G documentation',
+  path: ['donorPan']
+}).transform((data) => ({
+  amount: data.amount,
+  currency: 'INR',
+  donor_name: data.donorName,
+  donor_email: data.donorEmail.toLowerCase(),
+  donor_phone: data.donorPhone || null,
+  donor_pan: data.donorPan || null,
+  donor_address: data.donorAddress || null,
+  project_id: data.projectId || null,
+  is_80g_claimed: data.require80G,
+  payment_reference: data.paymentReference.toUpperCase()
 }));
 
 const verifyPaymentSchema = z.object({
@@ -87,5 +123,6 @@ const verifyPaymentSchema = z.object({
 
 module.exports = {
   createDonationOrderSchema,
+  createManualDonationSchema,
   verifyPaymentSchema
 };

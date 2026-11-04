@@ -265,7 +265,39 @@ All client or server errors return appropriate HTTP status codes (`400`, `401`, 
 
 ## 4. Donations & Payment Gateway APIs (`/api/v1/donations`, `/api/v1/payments`)
 
-### 4.1 Create Payment Order
+QR-only deployments use the manual submission flow below. The legacy gateway endpoints remain available for installations that explicitly configure gateway credentials; the public frontend uses the QR workflow.
+
+### 4.1 Submit a UPI QR Transfer for Reconciliation
+- **Endpoint:** `POST /api/v1/donations/manual`
+- **Auth:** Public / Optional Bearer Token
+- **Request Body:**
+  ```json
+  {
+    "amount": 2500,
+    "donorName": "Aarav Gupta",
+    "donorEmail": "aarav@example.com",
+    "donorPhone": "9876543210",
+    "paymentReference": "UPI123456789012",
+    "require80G": false
+  }
+  ```
+- **Response (`201 Created`):**
+  ```json
+  {
+    "success": true,
+    "message": "Donation submitted for payment reconciliation",
+    "data": {
+      "donation_id": "uuid",
+      "amount": "2500.00",
+      "currency": "INR",
+      "status": "PENDING",
+      "payment_method": "UPI_QR"
+    }
+  }
+  ```
+- Submission is not proof of payment. Only an administrator matching the reference and amount against bank records may confirm it.
+
+### 4.2 Create Payment Order (Legacy Gateway)
 - **Endpoint:** `POST /api/v1/donations/create-order`
 - **Auth:** Public / Optional Bearer Token
 - **Request Body:**
@@ -297,7 +329,7 @@ All client or server errors return appropriate HTTP status codes (`400`, `401`, 
   }
   ```
 
-### 4.2 Verify Payment (Server-Side HMAC Check)
+### 4.3 Verify Payment (Server-Side Gateway Verification)
 - **Endpoint:** `POST /api/v1/donations/verify`
 - **Auth:** Public
 - **Request Body:**
@@ -326,16 +358,21 @@ All client or server errors return appropriate HTTP status codes (`400`, `401`, 
     }
   }
   ```
+- The backend verifies the checkout HMAC, confirms that the order belongs to the
+  specified donation, then retrieves the payment from Razorpay and checks its
+  captured status, amount, currency, and order before issuing a receipt.
 
-### 4.3 Payment Gateway Webhook (Authoritative & Idempotent)
+### 4.4 Payment Gateway Webhook (Authoritative & Idempotent)
 - **Endpoint:** `POST /api/v1/payments/webhook`
 - **Auth:** Webhook HMAC-SHA256 signature in `X-Razorpay-Signature`
 - **Payload:** Raw Gateway Webhook Event
-- **Processing:** Verifies signature, runs atomic PostgreSQL transaction, records payment transaction, marks donation `COMPLETED`, logs audit entry.
+- **Processing:** Rejects invalid signatures in every environment, validates the
+  captured payment against the stored order, then runs an atomic transaction to
+  record payment, mark the donation `COMPLETED`, and issue the receipt.
 
-### 4.4 Get Donation 80G Tax Receipt
+### 4.5 Get Donation 80G Tax Receipt
 - **Endpoint:** `GET /api/v1/donations/:id/receipt`
-- **Auth:** Bearer Token (or receipt token)
+- **Auth:** Bearer Token; donor must own the donation, or caller must have the `ADMIN` role.
 - **Response (`200 OK`):**
   ```json
   {
@@ -344,8 +381,8 @@ All client or server errors return appropriate HTTP status codes (`400`, `401`, 
     "data": {
       "receipt_number": "SECT/2026-27/00142",
       "trust_name": "Saraswati Educational & Charitable Trust (SECT)",
-      "trust_registration_no": "TRUST/OD/2018/0091",
-      "tax_exemption_80g_no": "AAETS9821BF20214",
+      "trust_registration_no": null,
+      "tax_exemption_80g_no": null,
       "donor_name": "Aarav Gupta",
       "donor_pan": "ABCDE1234F",
       "amount": 2500,
@@ -431,11 +468,16 @@ All client or server errors return appropriate HTTP status codes (`400`, `401`, 
   }
   ```
 
-### 7.2 Admin User Management
+### 7.2 UPI Reconciliation
+- `GET /api/v1/admin/donations?status=PENDING` — List donation submissions for administrators.
+- `PATCH /api/v1/admin/donations/:id/confirm` — Confirm a pending UPI submission after bank statement verification; atomically completes the donation, updates project totals, and issues a receipt. Repeating confirmation is idempotent.
+- `PATCH /api/v1/admin/donations/:id/reject` — Reject a pending UPI submission without issuing a receipt.
+
+### 7.3 Admin User Management
 - `GET /api/v1/admin/users` — List users with role filter.
 - `PATCH /api/v1/admin/users/:id/role` — Update user role (`ADMIN`, `STAFF`, `MEMBER`, `DONOR`).
 
-### 7.3 Financial & 80G Reports
+### 7.4 Financial & 80G Reports
 - `GET /api/v1/reports/donations?from=2026-01-01&to=2026-03-31` — Donation ledger.
 - `GET /api/v1/reports/80g?financial_year=2025-26` — Exportable donor tax dataset.
 
@@ -443,17 +485,18 @@ All client or server errors return appropriate HTTP status codes (`400`, `401`, 
 
 ## 8. System Health API (`/api/v1/health`)
 
-- **Endpoint:** `GET /api/v1/health`
+- `GET /api/v1/health/live` reports process liveness without querying PostgreSQL.
+- `GET /api/v1/health/ready` reports readiness and returns `503` if PostgreSQL is unavailable.
+- `GET /api/v1/health` remains an alias for readiness.
 - **Auth:** Public
-- **Response (`200 OK`):**
+- **Liveness response (`200 OK`):**
   ```json
   {
     "success": true,
-    "message": "SECT API is healthy",
+    "message": "SECT Backend API process is alive",
     "data": {
       "status": "UP",
       "timestamp": "2026-03-08T11:45:00Z",
-      "database": "CONNECTED",
       "uptime_seconds": 3600
     }
   }

@@ -4,8 +4,6 @@ import { Heart, Users } from 'lucide-react';
 import { formatINR, calculateProgress } from '../../utils/formatters';
 import Button from '../common/Button';
 
-const defaultProjectImage = 'https://thumbs.dreamstime.com/b/group-students-community-members-gathers-outside-school-solar-panels-its-roof-sustainable-finance-project-349517027.jpg';
-
 export default function ProjectCard({ project }) {
   const progress = calculateProgress(project.raisedAmount, project.targetAmount);
 
@@ -14,7 +12,7 @@ export default function ProjectCard({ project }) {
       {/* Project Image */}
       <div style={{ position: 'relative', height: '210px', overflow: 'hidden' }}>
         <img
-          src={project.imageUrl || defaultProjectImage}
+          src={project.imageUrl || '/images/project-placeholder.svg'}
           alt={project.title}
           style={{ width: '100%', height: '100%', objectFit: 'cover' }}
         />
@@ -69,9 +67,9 @@ export default function ProjectCard({ project }) {
               marginBottom: '1.25rem',
             }}
           >
-            <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-              <Users size={14} /> {project.donorCount || 0} Patrons
-            </span>
+            {project.donorCount !== undefined && project.donorCount !== null && <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+              <Users size={14} /> {project.donorCount} Patrons
+            </span>}
             <span style={{ fontWeight: 700, color: 'var(--color-amber-600)' }}>{progress}% Funded</span>
           </div>
 

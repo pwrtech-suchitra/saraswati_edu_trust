@@ -7,17 +7,7 @@ const fs = require('fs');
 const path = require('path');
 const config = require('../config/env');
 
-let multer;
-try {
-  multer = require('multer');
-} catch {
-  // Graceful fallback dummy if multer is being installed
-  multer = () => ({
-    single: () => (req, res, next) => next(),
-    array: () => (req, res, next) => next()
-  });
-  multer.diskStorage = () => {};
-}
+const multer = require('multer');
 
 // Ensure upload directories exist
 const uploadsBase = config.uploadDir;
@@ -29,7 +19,7 @@ dirs.forEach(sub => {
   }
 });
 
-const storage = multer.diskStorage ? multer.diskStorage({
+const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     let folder = 'projects';
     if (file.mimetype === 'application/pdf') {
@@ -44,7 +34,7 @@ const storage = multer.diskStorage ? multer.diskStorage({
     const ext = path.extname(file.originalname);
     cb(null, `${file.fieldname}-${uniqueSuffix}${ext}`);
   }
-}) : null;
+});
 
 const fileFilter = (req, file, cb) => {
   const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
@@ -55,15 +45,12 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
-const upload = multer && multer.diskStorage ? multer({
+const upload = multer({
   storage,
   limits: {
     fileSize: config.maxFileSizeMb * 1024 * 1024 // e.g. 10MB
   },
   fileFilter
-}) : {
-  single: () => (req, res, next) => next(),
-  array: () => (req, res, next) => next()
-};
+});
 
 module.exports = upload;

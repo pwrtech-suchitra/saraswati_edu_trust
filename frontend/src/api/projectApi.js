@@ -1,8 +1,5 @@
 import axiosClient from './axiosClient';
 
-const defaultProjectImage = 'https://thumbs.dreamstime.com/b/group-students-community-members-gathers-outside-school-solar-panels-its-roof-sustainable-finance-project-349517027.jpg';
-const replacedProjectImage = 'https://images.unsplash.com/photo-1509391365360-2e959784a276?auto=format&fit=crop&w=800&q=80';
-
 function normalizeProject(p) {
   if (!p) return null;
   const projectImage = p.imageUrl || p.hero_image_url;
@@ -15,15 +12,11 @@ function normalizeProject(p) {
     description: p.description || p.summary || '',
     raisedAmount: Number(p.raisedAmount || p.raised_amount || 0),
     targetAmount: Number(p.targetAmount || p.target_amount || 0),
-    imageUrl: !projectImage || projectImage === replacedProjectImage ? defaultProjectImage : projectImage,
-    category: p.category || p.category_name || 'General',
+    imageUrl: projectImage || '',
+    category: p.category || p.category_name || '',
     categoryId: p.categoryId || p.category_id || '',
-    donorCount: p.donorCount || 0,
-    impactMetrics: p.impactMetrics || [
-      { label: 'Beneficiaries', value: p.beneficiaries || 'Local Community' },
-      { label: 'Location', value: p.location || 'Odisha' },
-      { label: 'Status', value: p.status || 'ACTIVE' }
-    ]
+    donorCount: p.donorCount ?? p.donor_count,
+    impactMetrics: p.impactMetrics || p.impact_metrics || []
   };
 }
 
@@ -32,7 +25,11 @@ export const projectApi = {
    * List active projects with category and search filter directly from database
    */
   async listProjects(params = {}) {
-    const response = await axiosClient.get('/projects', { params });
+    const { category, ...filters } = params;
+    const queryParams = category && category !== 'all'
+      ? { ...filters, category }
+      : filters;
+    const response = await axiosClient.get('/projects', { params: queryParams });
     if (response && Array.isArray(response.data)) {
       response.data = response.data.map(normalizeProject);
     }

@@ -28,11 +28,45 @@ async function createPendingDonation(data, userId = null) {
     data.donor_pan ? data.donor_pan.toUpperCase().trim() : null,
     data.donor_address || null,
     data.is_anonymous || false,
-    data.is_80g_claimed !== undefined ? data.is_80g_claimed : true,
+    data.is_80g_claimed !== undefined ? data.is_80g_claimed : false,
     DONATION_STATUS.PENDING
   ]);
 
   return res.rows[0];
+}
+
+async function createManualDonation(data, userId = null, database = db) {
+  try {
+    const result = await database.query(`
+      INSERT INTO donations (
+        user_id, project_id, amount, currency, donor_name, donor_email,
+        donor_phone, donor_pan, donor_address, is_80g_claimed, status,
+        payment_method, payment_reference
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 'PENDING', 'UPI_QR', $11)
+      RETURNING id, amount, currency, status, payment_method, created_at
+    `, [
+      userId,
+      data.project_id || null,
+      data.amount,
+      'INR',
+      data.donor_name,
+      data.donor_email.toLowerCase().trim(),
+      data.donor_phone || null,
+      data.donor_pan ? data.donor_pan.toUpperCase().trim() : null,
+      data.donor_address || null,
+      Boolean(data.is_80g_claimed),
+      data.payment_reference.trim().toUpperCase()
+    ]);
+
+    return result.rows[0];
+  } catch (error) {
+    if (error.code === '23505') {
+      const conflict = new Error('This UPI transaction reference has already been submitted.');
+      conflict.statusCode = 409;
+      throw conflict;
+    }
+    throw error;
+  }
 }
 
 /**
@@ -90,6 +124,7 @@ async function getUserDonations(userId, { page = 1, limit = 10 }) {
 
 module.exports = {
   createPendingDonation,
+  createManualDonation,
   getDonationById,
   getUserDonations
 };

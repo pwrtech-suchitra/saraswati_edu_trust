@@ -49,3 +49,7 @@ Thumbs.db
 database/pgdata/
 pgdata/
 
+# Deployment secrets
+/deploy/production.env
+/deploy/admin-bootstrap.env
+

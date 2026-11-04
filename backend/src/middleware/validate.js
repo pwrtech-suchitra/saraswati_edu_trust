@@ -27,8 +27,11 @@ function validate(schema, source = 'body') {
       }
       next();
     } catch (err) {
-      if (err.errors && Array.isArray(err.errors)) {
-        const formattedErrors = err.errors.map(e => ({
+      const validationIssues = Array.isArray(err.issues)
+        ? err.issues
+        : err.errors;
+      if (Array.isArray(validationIssues)) {
+        const formattedErrors = validationIssues.map(e => ({
           field: e.path ? e.path.join('.') : undefined,
           message: e.message
         }));

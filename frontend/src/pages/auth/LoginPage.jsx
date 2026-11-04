@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Lock, Mail, Shield } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { useNotification } from '../../hooks/useNotification';
@@ -8,7 +8,7 @@ import Input from '../../components/common/Input';
 import Button from '../../components/common/Button';
 
 export default function LoginPage() {
-  const { login } = useAuth();
+  const { login, logout } = useAuth();
   const { showSuccess, showError } = useNotification();
   const navigate = useNavigate();
   const location = useLocation();
@@ -34,24 +34,28 @@ export default function LoginPage() {
     setLoading(true);
     try {
       const res = await login({ email, password });
+      if (!['ADMIN', 'SUPERADMIN'].includes(res.data.user.role)) {
+        try {
+          await logout();
+        } catch {
+          showError('This account does not have staff access. Please refresh the page before continuing.');
+          return;
+        }
+        showError('This account does not have staff access.');
+        return;
+      }
+
       showSuccess(`Welcome back, ${res.data.user.name}!`);
       if (from) {
         navigate(from, { replace: true });
-      } else if (res.data.user.role === 'ADMIN') {
-        navigate('/admin', { replace: true });
       } else {
-        navigate('/profile', { replace: true });
+        navigate('/admin', { replace: true });
       }
     } catch (err) {
       showError(err.message || 'Login failed. Please check credentials.');
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleQuickDemo = (demoEmail, demoPass) => {
-    setEmail(demoEmail);
-    setPassword(demoPass);
   };
 
   return (
@@ -74,9 +78,9 @@ export default function LoginPage() {
             >
               <Shield size={28} />
             </div>
-            <h2 style={{ fontSize: '1.75rem', marginBottom: '0.35rem' }}>Sign In to SECT</h2>
+            <h2 style={{ fontSize: '1.75rem', marginBottom: '0.35rem' }}>Staff Sign In</h2>
             <p style={{ fontSize: '0.9rem', color: 'var(--color-slate-500)' }}>
-              Access your donor receipts, certificates, or management panel.
+              This sign-in is only for authorized SECT staff. The public website and donations do not require an account.
             </p>
           </div>
 
@@ -108,37 +112,6 @@ export default function LoginPage() {
             </Button>
           </form>
 
-          {/* Quick Demo Fill Buttons */}
-          <div style={{ marginTop: '1.75rem', borderTop: '1px solid var(--color-slate-200)', paddingTop: '1.25rem' }}>
-            <div style={{ fontSize: '0.78rem', color: 'var(--color-slate-400)', textAlign: 'center', marginBottom: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              Quick Demo Fill
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
-              <button
-                type="button"
-                onClick={() => handleQuickDemo('admin@sect.org', 'admin123')}
-                className="btn btn-outline btn-sm"
-                style={{ fontSize: '0.8rem' }}
-              >
-                Admin Demo
-              </button>
-              <button
-                type="button"
-                onClick={() => handleQuickDemo('mrinmayee@example.com', 'donor123')}
-                className="btn btn-outline btn-sm"
-                style={{ fontSize: '0.8rem' }}
-              >
-                Donor Demo
-              </button>
-            </div>
-          </div>
-
-          <div style={{ textAlign: 'center', marginTop: '1.5rem', fontSize: '0.9rem', color: 'var(--color-slate-600)' }}>
-            New patron or supporter?{' '}
-            <Link to="/register" style={{ fontWeight: 600, color: 'var(--color-primary-600)' }}>
-              Register account
-            </Link>
-          </div>
         </div>
       </div>
     </div>

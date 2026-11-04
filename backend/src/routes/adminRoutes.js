@@ -15,6 +15,9 @@ const { ROLES } = require('../utils/constants');
 router.use(authenticate, requireRole(ROLES.ADMIN));
 
 router.get('/stats', adminController.getDashboardStats);
+router.get('/donations', adminController.listDonations);
+router.patch('/donations/:id/confirm', adminController.confirmManualDonation);
+router.patch('/donations/:id/reject', adminController.rejectManualDonation);
 router.get('/users', adminController.listUsers);
 router.patch('/users/:id/role', adminController.updateUserRole);
 router.put('/users/:id/role', adminController.updateUserRole);

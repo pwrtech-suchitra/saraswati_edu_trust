@@ -1,8 +1,30 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Mail, Phone, MapPin, ShieldCheck, MessageCircle } from 'lucide-react';
+import { Mail, Phone, MapPin, MessageCircle } from 'lucide-react';
+import { trustProfileApi } from '../../api/trustProfileApi';
+import { DONOR_CONTACT_PHONE } from '../../utils/trustContacts';
+
+const currentYear = new Date().getFullYear();
 
 export default function Footer() {
+  const [profile, setProfile] = useState(null);
+
+  useEffect(() => {
+    trustProfileApi.getProfile()
+      .then((response) => setProfile(response.data || null))
+      .catch((error) => console.error('Error loading trust profile for footer:', error));
+  }, []);
+
+  const socialLinks = [
+    profile?.facebook_url && { label: 'Facebook', url: profile.facebook_url },
+    profile?.twitter_handle && {
+      label: 'X',
+      url: `https://x.com/${profile.twitter_handle.replace(/^@/, '')}`
+    },
+    profile?.linkedin_url && { label: 'LinkedIn', url: profile.linkedin_url }
+  ].filter(Boolean);
+  const whatsappNumbers = profile?.whatsapp_numbers || [];
+
   return (
     <footer
       style={{
@@ -15,6 +37,7 @@ export default function Footer() {
     >
       <div className="container">
         <div
+          className="footer-grid"
           style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
@@ -23,7 +46,7 @@ export default function Footer() {
           }}
         >
           {/* Column 1: About Trust & Statutory Status */}
-          <div>
+          <div className="footer-column">
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', marginBottom: '1.25rem' }}>
               <img
                 src="/logo.png"
@@ -43,146 +66,85 @@ export default function Footer() {
                 >
                   SECT
                 </span>
-                <span style={{ fontSize: '0.75rem', color: 'var(--color-slate-400)', letterSpacing: '0.5px' }}>
-                  SARASWATI EDUCATIONAL & CHARITABLE TRUST
+                <span className="footer-brand-subtitle" style={{ fontSize: '0.75rem', color: 'var(--color-slate-400)' }}>
+                  {profile?.trust_name || profile?.short_name || 'Charitable Trust'}
                 </span>
               </div>
             </div>
-            <p style={{ fontSize: '0.9rem', lineHeight: '1.6', color: 'var(--color-slate-400)', marginBottom: '1.25rem' }}>
-              A committed NGO active in community capacity building, renewable energy dissemination, sustainable livelihood, and Mission Sustainable India.
+            <p className="footer-introduction" style={{ fontSize: '0.9rem', lineHeight: '1.6', color: 'var(--color-slate-400)', marginBottom: '1.25rem' }}>
+              {profile?.introduction || 'Community-led work in education, environmental protection, renewable energy, and sustainable livelihoods.'}
             </p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              <div
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  backgroundColor: 'rgba(38, 145, 112, 0.15)',
-                  color: 'var(--color-primary-400)',
-                  padding: '0.45rem 0.85rem',
-                  borderRadius: 'var(--border-radius-sm)',
-                  fontSize: '0.82rem',
-                  fontWeight: 600,
-                  width: 'fit-content',
-                }}
-              >
-                <ShieldCheck size={16} />
-                <span>Section 80G Certified</span>
-              </div>
-              <div
-                style={{
-                  fontSize: '0.8rem',
-                  color: 'var(--color-slate-400)',
-                  marginTop: '0.2rem',
-                }}
-              >
-                Section 80G Certified Non-Profit
-              </div>
-            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }} />
           </div>
 
           {/* Column 2: Quick Navigation */}
-          <div>
-            <h4 style={{ color: 'var(--color-white)', fontSize: '1.05rem', fontWeight: 700, marginBottom: '1.25rem' }}>
+          <div className="footer-column">
+            <h2 style={{ color: 'var(--color-white)', fontSize: '1.05rem', fontWeight: 700, marginBottom: '1.25rem' }}>
               Explore SECT
-            </h4>
+            </h2>
             <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.75rem', fontSize: '0.92rem' }}>
               <li>
                 <Link to="/about" style={{ color: 'var(--color-slate-300)' }}>About SECT & Mission Sustainable India</Link>
               </li>
               <li>
-                <Link to="/activities" style={{ color: 'var(--color-slate-300)' }}>4 Core Activity Pillars (27 Mandates)</Link>
+                <Link to="/activities" style={{ color: 'var(--color-slate-300)' }}>Activity Areas &amp; Mandates</Link>
               </li>
               <li>
                 <Link to="/projects" style={{ color: 'var(--color-slate-300)' }}>Ongoing Community Initiatives</Link>
               </li>
               <li>
-                <Link to="/news-events" style={{ color: 'var(--color-slate-300)' }}>News & Upcoming Workshops</Link>
+                <Link to="/news-events" style={{ color: 'var(--color-slate-300)' }}>News &amp; Events</Link>
               </li>
               <li>
                 <Link to="/documents" style={{ color: 'var(--color-slate-300)' }}>Official Trust Documents & Audits</Link>
               </li>
               <li>
-                <Link to="/donate" style={{ color: 'var(--color-amber-400)', fontWeight: 600 }}>Online & UPI Donation</Link>
+                <Link to="/donate" style={{ color: 'var(--color-amber-400)', fontWeight: 600 }}>UPI QR Donation</Link>
               </li>
             </ul>
           </div>
 
-          {/* Column 3: The 4 Core Activity Pillars */}
-          <div>
-            <h4 style={{ color: 'var(--color-white)', fontSize: '1.05rem', fontWeight: 700, marginBottom: '1.25rem' }}>
-              4 Activity Pillars
-            </h4>
-            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.75rem', fontSize: '0.9rem', color: 'var(--color-slate-400)' }}>
-              <li>• Environmental & Renewable Energy (10 Mandates)</li>
-              <li>• Innovative Livelihood & SHGs (6 Mandates)</li>
-              <li>• Agricultural & Organic Dairy Farm (4 Mandates)</li>
-              <li>• Govt. Resource Mobilization (7 Mandates)</li>
-              <li>• 5P Sustainability Model (Planet, People, Prosperity, Peace, Partnership)</li>
-            </ul>
-          </div>
-
-          {/* Column 4: Secretariat & Social Coordinates */}
-          <div>
-            <h4 style={{ color: 'var(--color-white)', fontSize: '1.05rem', fontWeight: 700, marginBottom: '1.25rem' }}>
+          {/* Secretariat & Social Coordinates */}
+          <div className="footer-column">
+            <h2 style={{ color: 'var(--color-white)', fontSize: '1.05rem', fontWeight: 700, marginBottom: '1.25rem' }}>
               Stay Connected
-            </h4>
+            </h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', fontSize: '0.88rem', color: 'var(--color-slate-400)' }}>
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
+              {profile?.address && <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
                 <MapPin size={18} color="var(--color-amber-500)" style={{ flexShrink: 0, marginTop: '0.2rem' }} />
-                <span>K-8-82, Kalinga Nagar, Ghatikia, Bhubaneswar, Odisha-751029</span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <span>{profile.address}</span>
+              </div>}
+              {profile?.email && <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                 <Mail size={18} color="var(--color-amber-500)" style={{ flexShrink: 0 }} />
-                <a href="mailto:strust12@gmail.com" style={{ color: 'var(--color-slate-300)' }}>strust12@gmail.com</a>
-              </div>
+                <a href={`mailto:${profile.email}`} style={{ color: 'var(--color-slate-300)' }}>{profile.email}</a>
+              </div>}
+              {profile?.phone_landline && <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <Phone size={18} color="var(--color-amber-500)" style={{ flexShrink: 0 }} />
+                <a href={`tel:${profile.phone_landline}`} style={{ color: 'var(--color-slate-300)' }}>{profile.phone_landline}</a>
+              </div>}
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                 <Phone size={18} color="var(--color-amber-500)" style={{ flexShrink: 0 }} />
-                <span>0674-2954256</span>
+                <a href={`tel:${DONOR_CONTACT_PHONE}`} style={{ color: 'var(--color-slate-300)' }}>Donor assistance: {DONOR_CONTACT_PHONE}</a>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              {whatsappNumbers.length > 0 && <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                 <MessageCircle size={18} color="#22c55e" style={{ flexShrink: 0 }} />
                 <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                  <a href="https://wa.me/919438747172" target="_blank" rel="noopener noreferrer" style={{ color: '#86efac' }}>
-                    +91 9438747172
-                  </a>
-                  <span>/</span>
-                  <a href="https://wa.me/919937159760" target="_blank" rel="noopener noreferrer" style={{ color: '#86efac' }}>
-                    +91 9937159760
-                  </a>
+                  {whatsappNumbers.map((phone) => {
+                    const digits = phone.replace(/\D/g, '');
+                    const number = digits.startsWith('91') ? digits : `91${digits}`;
+                    return <a key={phone} href={`https://wa.me/${number}`} target="_blank" rel="noopener noreferrer" style={{ color: '#86efac' }}>{phone}</a>;
+                  })}
                 </div>
-              </div>
+              </div>}
 
               {/* Social Channels */}
-              <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
-                <a
-                  href="https://facebook.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="social-badge"
-                  style={{ color: 'var(--color-slate-300)', fontSize: '0.8rem', padding: '0.3rem 0.6rem', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '4px' }}
-                >
-                  Facebook
-                </a>
-                <a
-                  href="https://twitter.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="social-badge"
-                  style={{ color: 'var(--color-slate-300)', fontSize: '0.8rem', padding: '0.3rem 0.6rem', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '4px' }}
-                >
-                  @saraswati_trust
-                </a>
-                <a
-                  href="https://linkedin.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="social-badge"
-                  style={{ color: 'var(--color-slate-300)', fontSize: '0.8rem', padding: '0.3rem 0.6rem', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '4px' }}
-                >
-                  LinkedIn
-                </a>
-              </div>
+              {socialLinks.length > 0 && <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
+                {socialLinks.map(({ label, url }) => (
+                  <a key={label} href={url} target="_blank" rel="noopener noreferrer" className="social-badge" style={{ color: 'var(--color-slate-300)', fontSize: '0.8rem', padding: '0.3rem 0.6rem', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '4px' }}>
+                    {label}
+                  </a>
+                ))}
+              </div>}
             </div>
           </div>
         </div>
@@ -198,16 +160,15 @@ export default function Footer() {
             justifyContent: 'space-between',
             gap: '1rem',
             fontSize: '0.85rem',
-            color: 'var(--color-slate-500)',
+            color: 'var(--color-slate-400)',
           }}
         >
           <div>
-            © {new Date().getFullYear()} Saraswati Educational & Charitable Trust. All rights reserved. Registered Indian Public Trust.
+            © {currentYear} {profile?.trust_name || 'SECT'}. All rights reserved.
           </div>
           <div style={{ display: 'flex', gap: '1.5rem' }}>
             <Link to="/contact" style={{ color: 'var(--color-slate-400)' }}>Contact Secretariat</Link>
-            <Link to="/donate" style={{ color: 'var(--color-slate-400)' }}>Online Donation</Link>
-            <Link to="/admin" style={{ color: 'var(--color-slate-500)' }}>Staff Portal</Link>
+            <Link to="/donate" style={{ color: 'var(--color-slate-400)' }}>UPI QR Donation</Link>
           </div>
         </div>
       </div>

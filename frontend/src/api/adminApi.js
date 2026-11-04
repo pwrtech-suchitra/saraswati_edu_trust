@@ -8,6 +8,18 @@ export const adminApi = {
     return await axiosClient.get('/admin/stats');
   },
 
+  async getDonations(params = {}) {
+    return await axiosClient.get('/admin/donations', { params });
+  },
+
+  async confirmManualDonation(donationId) {
+    return await axiosClient.patch(`/admin/donations/${donationId}/confirm`);
+  },
+
+  async rejectManualDonation(donationId) {
+    return await axiosClient.patch(`/admin/donations/${donationId}/reject`);
+  },
+
   /**
    * Get all registered users directly from database (Admin only)
    */
@@ -41,5 +53,12 @@ export const adminApi = {
    */
   async getReports(params = {}) {
     return await axiosClient.get('/reports/donations', { params });
+  },
+
+  /**
+   * Get issued 80G donation receipt records for a financial year
+   */
+  async get80GReports(financialYear) {
+    return await axiosClient.get('/reports/80g', { params: { financial_year: financialYear } });
   }
 };

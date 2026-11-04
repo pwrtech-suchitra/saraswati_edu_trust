@@ -227,7 +227,7 @@ c:\Users\Suchitra Mishra\Desktop\SECT\
      - `DATABASE_URL=postgres://user:password@localhost:5432/sect_db`
      - `JWT_SECRET`, `JWT_REFRESH_SECRET`
      - `PAYMENT_KEY_ID`, `PAYMENT_KEY_SECRET`, `PAYMENT_WEBHOOK_SECRET`
-     - `FRONTEND_URL=http://localhost:5173` (Mrinmayee's Vite dev server)
+     - `FRONTEND_URL=http://localhost:3000` (Mrinmayee's Vite dev server)
      - `UPLOAD_DIR=./uploads`
    - Configure PostgreSQL client pool in `backend/src/config/db.js`.
 2. **Database Core Migrations**:

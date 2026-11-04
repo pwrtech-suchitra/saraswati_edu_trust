@@ -4,7 +4,25 @@
  */
 
 const db = require('../config/db');
+const config = require('../config/env');
+const fs = require('fs');
+const path = require('path');
 const ApiResponse = require('../utils/apiResponse');
+
+function documentFileExists(fileUrl) {
+  const prefix = '/uploads/documents/';
+  if (typeof fileUrl !== 'string' || !fileUrl.startsWith(prefix)) {
+    return false;
+  }
+
+  const filename = path.posix.basename(fileUrl);
+  if (!filename || filename === '.' || filename === '..') {
+    return false;
+  }
+
+  const filePath = path.resolve(config.uploadDir, 'documents', filename);
+  return fs.existsSync(filePath);
+}
 
 async function listMedia(req, res, next) {
   try {
@@ -64,7 +82,11 @@ async function listDocuments(req, res, next) {
     const sql = `SELECT * FROM documents ${whereSql} ORDER BY year DESC, created_at DESC`;
 
     const result = await db.query(sql, params);
-    return ApiResponse.success(res, 'Documents retrieved', result.rows);
+    const documents = result.rows.map((document) => ({
+      ...document,
+      file_available: documentFileExists(document.file_url)
+    }));
+    return ApiResponse.success(res, 'Documents retrieved', documents);
   } catch (err) {
     next(err);
   }

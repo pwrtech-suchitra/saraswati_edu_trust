@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Search, RefreshCw, FolderOpen } from 'lucide-react';
+import { Search, RefreshCw, FolderOpen, Presentation } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { projectApi } from '../../api/projectApi';
 import ProjectCard from '../../components/cards/ProjectCard';
 import { CardSkeleton } from '../../components/common/Loader';
@@ -95,6 +96,34 @@ export default function ProjectsPage() {
           <p style={{ fontSize: '1.2rem', color: 'var(--color-slate-300)', maxWidth: '720px' }}>
             Discover transparent, measurable grassroots projects seeking patron support. Track funding goals and beneficiary outcomes in real-time.
           </p>
+        </div>
+      </section>
+
+      <section className="container" style={{ paddingTop: '2rem' }}>
+        <div
+          className="card"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '1.5rem',
+            flexWrap: 'wrap',
+            padding: '1.5rem 2rem',
+            borderLeft: '6px solid var(--color-primary-600)',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <Presentation size={32} color="var(--color-primary-700)" />
+            <div>
+              <h2 style={{ fontSize: '1.2rem', marginBottom: '0.35rem' }}>Online Programs &amp; Webinars</h2>
+              <p style={{ color: 'var(--color-slate-600)', margin: 0 }}>
+                Browse images from SECT&apos;s online program presentations and webinars.
+              </p>
+            </div>
+          </div>
+          <Link className="btn btn-primary" to="/projects/online-programs">
+            Explore program archive
+          </Link>
         </div>
       </section>
 

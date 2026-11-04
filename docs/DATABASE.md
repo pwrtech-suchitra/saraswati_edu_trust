@@ -150,8 +150,12 @@
 - `is_80g_claimed` (BOOLEAN DEFAULT TRUE)
 - `status` (VARCHAR(30) DEFAULT 'PENDING') — `PENDING`, `COMPLETED`, `FAILED`, `REFUNDED`
 - `receipt_number` (VARCHAR(50) UNIQUE)
+- `payment_method` (VARCHAR(20)) — `UPI_QR` for manually reconciled transfers.
+- `payment_reference` (VARCHAR(100)) — donor-reported UPI reference; unique case-insensitively for UPI QR submissions.
 - `created_at` (TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP)
 - `updated_at` (TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP)
+
+Migration `011_add_upi_donation_reconciliation.sql` adds the payment method/reference fields and indexes pending manual review rows. UPI reports remain `PENDING` until an administrator verifies the transaction against bank records.
 
 #### `payment_orders`
 - `id` (UUID PRIMARY KEY DEFAULT gen_random_uuid())

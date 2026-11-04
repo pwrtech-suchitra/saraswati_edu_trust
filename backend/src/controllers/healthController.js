@@ -6,6 +6,14 @@
 const db = require('../config/db');
 const ApiResponse = require('../utils/apiResponse');
 
+function getLiveness(req, res) {
+  return ApiResponse.success(res, 'SECT Backend API process is alive', {
+    status: 'UP',
+    timestamp: new Date().toISOString(),
+    uptime_seconds: Math.floor(process.uptime())
+  });
+}
+
 async function getHealth(req, res) {
   const dbStatus = await db.testConnection();
   const uptime = Math.floor(process.uptime());
@@ -19,12 +27,14 @@ async function getHealth(req, res) {
   };
 
   if (!dbStatus.ok) {
-    return ApiResponse.error(res, 'Database connection error', [{ error: dbStatus.error }], 503);
+    const errors = process.env.NODE_ENV === 'production' ? [] : [{ error: dbStatus.error }];
+    return ApiResponse.error(res, 'Database connection error', errors, 503);
   }
 
   return ApiResponse.success(res, 'SECT Backend API is healthy', data);
 }
 
 module.exports = {
+  getLiveness,
   getHealth
 };

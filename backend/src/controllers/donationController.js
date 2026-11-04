@@ -7,6 +7,23 @@ const donationService = require('../services/donationService');
 const paymentService = require('../services/paymentService');
 const db = require('../config/db');
 const ApiResponse = require('../utils/apiResponse');
+const { ROLES } = require('../utils/constants');
+
+async function submitManualDonation(req, res, next) {
+  try {
+    const donation = await donationService.createManualDonation(req.body, req.user?.id || null);
+    return ApiResponse.created(res, 'Donation submitted for payment reconciliation', {
+      donation_id: donation.id,
+      amount: donation.amount,
+      currency: donation.currency,
+      status: donation.status,
+      payment_method: donation.payment_method,
+      created_at: donation.created_at
+    });
+  } catch (err) {
+    next(err);
+  }
+}
 
 async function createOrder(req, res, next) {
   try {
@@ -47,7 +64,7 @@ async function getReceipt(req, res, next) {
   try {
     const { id } = req.params;
     const text = `
-      SELECT r.*, d.project_id, p.title as project_title
+      SELECT r.*, d.project_id, d.user_id, p.title as project_title
       FROM donation_receipts r
       JOIN donations d ON r.donation_id = d.id
       LEFT JOIN projects p ON d.project_id = p.id
@@ -60,6 +77,9 @@ async function getReceipt(req, res, next) {
     }
 
     const receipt = result.rows[0];
+    if (req.user.role !== ROLES.ADMIN && receipt.user_id !== req.user.id) {
+      return ApiResponse.error(res, 'Donation receipt not found', [], 404);
+    }
     return ApiResponse.success(res, 'Receipt details retrieved', receipt.receipt_data);
   } catch (err) {
     next(err);
@@ -67,6 +87,7 @@ async function getReceipt(req, res, next) {
 }
 
 module.exports = {
+  submitManualDonation,
   createOrder,
   verifyPayment,
   getMyDonations,

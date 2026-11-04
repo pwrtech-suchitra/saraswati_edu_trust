@@ -7,11 +7,10 @@ const helmet = require('helmet');
 const cors = require('cors');
 const config = require('../config/env');
 
-const allowedOrigins = [
-  config.frontendUrl,
-  'http://localhost:5173',
-  'http://localhost:3000'
-];
+const allowedOrigins = [config.frontendUrl];
+if (config.nodeEnv !== 'production') {
+  allowedOrigins.push('http://localhost:5173', 'http://localhost:3000');
+}
 
 const corsOptions = {
   origin: function (origin, callback) {

@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            backend/package-lock.json
+            frontend/package-lock.json
+
+      - name: Install backend dependencies
+        run: npm ci --prefix backend
+
+      - name: Install frontend dependencies
+        run: npm ci --prefix frontend
+
+      - name: Audit backend dependencies
+        run: npm audit --prefix backend --audit-level=high
+
+      - name: Audit frontend dependencies
+        run: npm audit --prefix frontend --audit-level=high
+
+      - name: Run backend tests
+        run: npm test
+
+      - name: Lint frontend
+        run: npm run lint:frontend
+
+      - name: Build frontend
+        run: npm run build:frontend
+
+      - name: Validate production Compose configuration
+        run: docker compose --env-file deploy/production.env.example -f deploy/compose.production.yaml config --quiet
+
+      - name: Verify least-privilege database credentials in Compose
+        run: node deploy/check-compose-config.cjs
+
+      - name: Build production containers
+        run: |
+          docker build -f deploy/backend.Dockerfile -t sect-api:ci .
+          docker build -f deploy/frontend.Dockerfile -t sect-web:ci .

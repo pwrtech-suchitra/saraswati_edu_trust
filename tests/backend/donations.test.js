@@ -57,6 +57,31 @@ test('createDonationOrderSchema validates camelCase inputs from frontend', () =>
   assert.strictEqual(parsed.data.is_80g_claimed, true);
 });
 
+test('createDonationOrderSchema allows a donation without an 80G request or PAN', () => {
+  const parsed = createDonationOrderSchema.safeParse({
+    amount: 2500,
+    donorName: 'Priyanka Sen',
+    donorEmail: 'priyanka@example.com',
+    require80G: false
+  });
+
+  assert.strictEqual(parsed.success, true);
+  assert.strictEqual(parsed.data.is_80g_claimed, false);
+  assert.strictEqual(parsed.data.donor_pan, null);
+});
+
+test('createDonationOrderSchema requires a PAN when 80G documentation is requested', () => {
+  const parsed = createDonationOrderSchema.safeParse({
+    amount: 2500,
+    donorName: 'Priyanka Sen',
+    donorEmail: 'priyanka@example.com',
+    require80G: true
+  });
+
+  assert.strictEqual(parsed.success, false);
+  assert.ok(parsed.error.issues.some((issue) => issue.path.includes('donor_pan')));
+});
+
 test('buildReceiptData constructs complete 80G certificate record', () => {
   const donation = {
     donor_name: 'Subhashree Roy',
@@ -71,7 +96,14 @@ test('buildReceiptData constructs complete 80G certificate record', () => {
     receiptNumber: 'SECT/2026-27/00001',
     financialYear: '2026-27',
     donation,
-    transactionId: 'pay_mock_test_123'
+    transactionId: 'pay_test_123',
+    trustProfile: {
+      trust_name: 'Test Trust',
+      pan: 'AAAPT1234A',
+      address: 'Test Address',
+      registration_no: 'TEST/001',
+      exemption_80g_no: 'TEST80G001'
+    }
   });
 
   assert.strictEqual(receipt.receipt_number, 'SECT/2026-27/00001');

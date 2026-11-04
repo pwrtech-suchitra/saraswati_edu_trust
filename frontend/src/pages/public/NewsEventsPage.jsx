@@ -15,6 +15,9 @@ export default function NewsEventsPage() {
   const [news, setNews] = useState([]);
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
+  const [articleLoading, setArticleLoading] = useState(false);
+  const [articleError, setArticleError] = useState('');
 
   // Modal states
   const [selectedArticle, setSelectedArticle] = useState(null);
@@ -25,22 +28,43 @@ export default function NewsEventsPage() {
 
   useEffect(() => {
     async function loadData() {
-      setLoading(false);
       try {
         const [newsRes, eventsRes] = await Promise.all([
           contentApi.getNews(),
           contentApi.getEvents(),
         ]);
-        if (newsRes.success) setNews(newsRes.data || []);
-        if (eventsRes.success) setEvents(eventsRes.data || []);
+        if (!newsRes.success || !eventsRes.success) {
+          throw new Error(newsRes.message || eventsRes.message || 'Updates could not be loaded.');
+        }
+        setNews(newsRes.data || []);
+        setEvents(eventsRes.data || []);
       } catch (err) {
-        console.error(err);
+        console.error('Failed to load news and events:', err);
+        setLoadError(err.message || 'Updates could not be loaded.');
       } finally {
         setLoading(false);
       }
     }
     loadData();
   }, []);
+
+  const handleReadArticle = async (article) => {
+    setSelectedArticle(article);
+    setArticleLoading(true);
+    setArticleError('');
+    try {
+      const response = await contentApi.getNewsArticle(article.id || article.slug);
+      if (!response.success || !response.data) {
+        throw new Error(response.message || 'The full article could not be loaded.');
+      }
+      setSelectedArticle(response.data);
+    } catch (err) {
+      console.error('Failed to load full news article:', err);
+      setArticleError(err.message || 'The full article could not be loaded.');
+    } finally {
+      setArticleLoading(false);
+    }
+  };
 
   const handleRegisterSubmit = async (e) => {
     e.preventDefault();
@@ -57,11 +81,11 @@ export default function NewsEventsPage() {
     setSubmittingReg(true);
     try {
       await contentApi.registerForEvent(selectedEvent.id, regForm);
-      showSuccess(`You are registered for ${selectedEvent.title}! Confirmation sent to ${regForm.email}`);
+      showSuccess(`Your registration for ${selectedEvent.title} has been recorded.`);
       setSelectedEvent(null);
       setRegForm({ name: '', email: '', phone: '', attendees: '1' });
-    } catch {
-      showError('Failed to register. Please try again.');
+    } catch (err) {
+      showError(err.message || 'Failed to register. Please try again.');
     } finally {
       setSubmittingReg(false);
     }
@@ -121,10 +145,12 @@ export default function NewsEventsPage() {
         <div className="container">
           {loading ? (
             <Spinner text="Loading updates..." />
+          ) : loadError ? (
+            <p role="alert" className="form-error">{loadError}</p>
           ) : activeTab === 'news' ? (
             <div className="grid grid-cols-2">
               {news.map((item) => (
-                <NewsCard key={item.id} article={item} onReadMore={(art) => setSelectedArticle(art)} />
+                <NewsCard key={item.id} article={item} onReadMore={handleReadArticle} />
               ))}
             </div>
           ) : (
@@ -146,12 +172,18 @@ export default function NewsEventsPage() {
         {selectedArticle && (
           <div>
             <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.25rem', fontSize: '0.85rem', color: 'var(--color-slate-500)' }}>
-              <span>Category: <strong>{selectedArticle.category}</strong></span>
+              {selectedArticle.category && <span>Category: <strong>{selectedArticle.category}</strong></span>}
               <span>Published: <strong>{selectedArticle.date}</strong></span>
             </div>
-            <p style={{ fontSize: '1.05rem', lineHeight: '1.8', color: 'var(--color-slate-700)', marginBottom: '1.5rem' }}>
-              {selectedArticle.content}
-            </p>
+            {articleLoading ? (
+              <p>Loading full article...</p>
+            ) : articleError ? (
+              <p role="alert" className="form-error">{articleError}</p>
+            ) : (
+              <p style={{ fontSize: '1.05rem', lineHeight: '1.8', color: 'var(--color-slate-700)', marginBottom: '1.5rem' }}>
+                {selectedArticle.content}
+              </p>
+            )}
             <div style={{ textAlign: 'right' }}>
               <Button variant="outline" size="sm" onClick={() => setSelectedArticle(null)}>
                 Close

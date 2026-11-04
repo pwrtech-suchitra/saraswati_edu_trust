@@ -16,12 +16,19 @@ import { Link } from 'react-router-dom';
 export default function DashboardPage() {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     async function loadStats() {
       try {
         const res = await adminApi.getDashboardStats();
-        if (res.success) setStats(res.data);
+        if (!res.success) {
+          throw new Error(res.message || 'Dashboard metrics could not be loaded.');
+        }
+        setStats(res.data);
+      } catch (requestError) {
+        console.error('Failed to load dashboard metrics:', requestError);
+        setError(requestError.message || 'Dashboard metrics could not be loaded.');
       } finally {
         setLoading(false);
       }
@@ -32,6 +39,9 @@ export default function DashboardPage() {
   if (loading) {
     return <Spinner text="Loading trust operations overview..." />;
   }
+  if (error) {
+    return <p role="alert" className="form-error">{error}</p>;
+  }
 
   return (
     <div>
@@ -40,7 +50,7 @@ export default function DashboardPage() {
         <div>
           <h2 style={{ fontSize: '1.75rem', color: 'var(--color-slate-900)' }}>Operations Dashboard</h2>
           <p style={{ color: 'var(--color-slate-500)', fontSize: '0.92rem' }}>
-            Real-time analytics and management controls for Saraswati Trust.
+            Live analytics and management controls.
           </p>
         </div>
         <div style={{ display: 'flex', gap: '0.75rem' }}>
@@ -64,7 +74,7 @@ export default function DashboardPage() {
             <TrendingUp size={26} />
           </div>
           <div>
-            <div className="stat-value">{formatINR(stats?.totalDonationsAmount || 2955000)}</div>
+            <div className="stat-value">{formatINR(stats?.total_donations_amount ?? 0)}</div>
             <div className="stat-label">Total Contributions</div>
           </div>
         </div>
@@ -74,8 +84,8 @@ export default function DashboardPage() {
             <Users size={26} />
           </div>
           <div>
-            <div className="stat-value">{stats?.totalDonationsCount || 865}</div>
-            <div className="stat-label">Verified Patrons</div>
+            <div className="stat-value">{stats?.total_donors_count ?? 0}</div>
+            <div className="stat-label">Donors</div>
           </div>
         </div>
 
@@ -84,7 +94,7 @@ export default function DashboardPage() {
             <FolderKanban size={26} />
           </div>
           <div>
-            <div className="stat-value">{stats?.activeProjectsCount || 12}</div>
+            <div className="stat-value">{stats?.active_projects_count ?? 0}</div>
             <div className="stat-label">Active Projects</div>
           </div>
         </div>
@@ -94,7 +104,7 @@ export default function DashboardPage() {
             <MessageSquareText size={26} color="#0f172a" />
           </div>
           <div>
-            <div className="stat-value">{stats?.pendingInquiriesCount || 6}</div>
+            <div className="stat-value">{stats?.pending_inquiries_count ?? 0}</div>
             <div className="stat-label">Pending Inquiries</div>
           </div>
         </div>
@@ -122,7 +132,6 @@ export default function DashboardPage() {
               <tr>
                 <th>Receipt / ID</th>
                 <th>Donor Name</th>
-                <th>PAN</th>
                 <th>Designated Project</th>
                 <th>Amount</th>
                 <th>Status</th>
@@ -130,19 +139,16 @@ export default function DashboardPage() {
               </tr>
             </thead>
             <tbody>
-              {stats?.recentDonations?.map((don) => (
+              {stats?.recent_donations?.map((don) => (
                 <tr key={don.id}>
-                  <td style={{ fontFamily: 'monospace', fontWeight: 600 }}>{don.id}</td>
-                  <td style={{ fontWeight: 600 }}>{don.donorName}</td>
-                  <td style={{ fontFamily: 'monospace', color: 'var(--color-slate-600)' }}>{don.pan || '—'}</td>
-                  <td>{don.projectTitle}</td>
+                  <td style={{ fontFamily: 'monospace', fontWeight: 600 }}>{don.receipt_number || don.id}</td>
+                  <td style={{ fontWeight: 600 }}>{don.donor_name}</td>
+                  <td>{don.project_title || '—'}</td>
                   <td style={{ fontWeight: 700, color: 'var(--color-primary-700)' }}>{formatINR(don.amount)}</td>
                   <td>
-                    <span className={`badge ${don.status === 'COMPLETED' ? 'badge-success' : 'badge-warning'}`}>
-                      {don.status}
-                    </span>
+                    <span className="badge badge-success">COMPLETED</span>
                   </td>
-                  <td>{formatDate(don.date)}</td>
+                  <td>{formatDate(don.created_at)}</td>
                 </tr>
               ))}
             </tbody>

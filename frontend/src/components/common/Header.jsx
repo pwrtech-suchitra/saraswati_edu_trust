@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
-import { Heart, Menu, X, Shield, User, LogOut, Sun } from 'lucide-react';
+import { Heart, Menu, X, Shield, LogOut } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import Button from './Button';
 
@@ -105,7 +105,7 @@ export default function Header() {
             </Button>
           </Link>
 
-          {isAuthenticated ? (
+          {isAuthenticated && (
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               {isAdmin && (
                 <Link to="/admin">
@@ -114,11 +114,6 @@ export default function Header() {
                   </Button>
                 </Link>
               )}
-              <Link to="/profile">
-                <Button variant="ghost" size="sm" icon={User}>
-                  Profile
-                </Button>
-              </Link>
               <button
                 onClick={handleLogout}
                 className="btn btn-ghost btn-sm"
@@ -128,12 +123,6 @@ export default function Header() {
                 <LogOut size={16} />
               </button>
             </div>
-          ) : (
-            <Link to="/login" className="desktop-nav-auth" style={{ display: 'none' }}>
-              <Button variant="outline" size="sm">
-                Login
-              </Button>
-            </Link>
           )}
 
           {/* Mobile Menu Toggle Button */}
@@ -191,16 +180,19 @@ export default function Header() {
             </Link>
           ))}
 
-          {!isAuthenticated ? (
-            <Link to="/login" onClick={() => setMobileMenuOpen(false)}>
-              <Button variant="outline" style={{ width: '100%' }}>
-                Login
+          {isAuthenticated && (
+            <>
+              {isAdmin && (
+                <Link to="/admin" onClick={() => setMobileMenuOpen(false)}>
+                  <Button variant="outline" icon={Shield} style={{ width: '100%' }}>
+                    Admin
+                  </Button>
+                </Link>
+              )}
+              <Button variant="danger" size="sm" onClick={handleLogout} icon={LogOut}>
+                Sign Out
               </Button>
-            </Link>
-          ) : (
-            <Button variant="danger" size="sm" onClick={handleLogout} icon={LogOut}>
-              Sign Out
-            </Button>
+            </>
           )}
         </div>
       )}
@@ -209,7 +201,6 @@ export default function Header() {
       <style>{`
         @media (min-width: 900px) {
           .desktop-nav { display: flex !important; }
-          .desktop-nav-auth { display: block !important; }
           .mobile-toggle { display: none !important; }
         }
       `}</style>

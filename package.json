@@ -4,14 +4,20 @@
   "private": true,
   "description": "Saraswati Educational & Charitable Trust (SECT) Web Application",
   "scripts": {
+    "dev": "concurrently -k -n API,WEB \"npm:dev:backend\" \"npm:dev:frontend\"",
+    "start": "npm run start:backend",
     "test": "node --test tests/backend/*.test.js",
     "test:backend": "npm --prefix backend test",
     "dev:backend": "npm --prefix backend run dev",
     "start:backend": "npm --prefix backend start",
     "dev:frontend": "npm --prefix frontend run dev",
+    "start:frontend": "npm --prefix frontend run start",
     "build:frontend": "npm --prefix frontend run build",
     "lint:frontend": "npm --prefix frontend run lint",
     "migrate": "node database/migrate.js",
     "migrate:seed": "node database/migrate.js --seed"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
   }
 }

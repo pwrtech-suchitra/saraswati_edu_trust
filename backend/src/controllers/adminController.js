@@ -6,6 +6,44 @@
 const db = require('../config/db');
 const ApiResponse = require('../utils/apiResponse');
 const { logAction } = require('../services/auditService');
+const manualDonationService = require('../services/manualDonationService');
+
+async function listDonations(req, res, next) {
+  try {
+    const status = req.query.status || null;
+    if (status && !['PENDING', 'COMPLETED', 'FAILED', 'REFUNDED'].includes(status)) {
+      return ApiResponse.error(res, 'Invalid donation status filter.', [], 400);
+    }
+    const donations = await manualDonationService.listDonations({ status });
+    return ApiResponse.success(res, 'Donation submissions retrieved', donations);
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function confirmManualDonation(req, res, next) {
+  try {
+    const result = await manualDonationService.confirmManualDonation({
+      donationId: req.params.id,
+      adminUserId: req.user.id
+    });
+    return ApiResponse.success(res, 'Donation confirmed against trust bank records', result);
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function rejectManualDonation(req, res, next) {
+  try {
+    const result = await manualDonationService.rejectManualDonation({
+      donationId: req.params.id,
+      adminUserId: req.user.id
+    });
+    return ApiResponse.success(res, 'Donation submission rejected', result);
+  } catch (err) {
+    next(err);
+  }
+}
 
 async function getDashboardStats(req, res, next) {
   try {
@@ -146,6 +184,9 @@ async function updateUserRole(req, res, next) {
 }
 
 module.exports = {
+  listDonations,
+  confirmManualDonation,
+  rejectManualDonation,
   getDashboardStats,
   listUsers,
   updateUserRole

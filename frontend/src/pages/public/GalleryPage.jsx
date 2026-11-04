@@ -83,18 +83,15 @@ export default function GalleryPage() {
                   className="card"
                   style={{ cursor: 'pointer', overflow: 'hidden' }}
                 >
-                  <div style={{ height: '280px', overflow: 'hidden' }}>
+                  <div style={{ height: '280px', overflow: 'hidden', backgroundColor: 'var(--color-slate-100)' }}>
                     <img
                       src={item.imageUrl}
                       alt={item.title}
                       style={{
                         width: '100%',
                         height: '100%',
-                        objectFit: 'cover',
-                        transition: 'transform 0.3s ease',
+                        objectFit: 'contain',
                       }}
-                      onMouseOver={(e) => (e.currentTarget.style.transform = 'scale(1.05)')}
-                      onMouseOut={(e) => (e.currentTarget.style.transform = 'scale(1.0)')}
                     />
                   </div>
                   <div style={{ padding: '1.25rem' }}>
@@ -123,7 +120,7 @@ export default function GalleryPage() {
             <img
               src={activePhoto.imageUrl}
               alt={activePhoto.title}
-              style={{ width: '100%', borderRadius: 'var(--border-radius-md)', maxHeight: '480px', objectFit: 'cover', marginBottom: '1rem' }}
+              style={{ width: '100%', borderRadius: 'var(--border-radius-md)', maxHeight: '480px', objectFit: 'contain', backgroundColor: 'var(--color-slate-100)', marginBottom: '1rem' }}
             />
             <p style={{ color: 'var(--color-slate-600)', fontSize: '0.95rem' }}>
               Category: <strong>{activePhoto.category}</strong>

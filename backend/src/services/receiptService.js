@@ -4,7 +4,6 @@
  */
 
 const db = require('../config/db');
-const config = require('../config/env');
 
 /**
  * Convert number to words in Indian Rupees
@@ -57,11 +56,13 @@ function numberToWordsINR(amount) {
  */
 async function generateReceiptNumber(client = null) {
   const now = new Date();
-  const currentYear = now.getFullYear();
-  const nextYear = (currentYear + 1).toString().slice(-2);
-  const financialYear = `${currentYear}-${nextYear}`;
+  const financialYearStart = now.getMonth() >= 3 ? now.getFullYear() : now.getFullYear() - 1;
+  const financialYear = `${financialYearStart}-${String(financialYearStart + 1).slice(-2)}`;
 
   const queryFn = client ? client.query.bind(client) : db.query;
+  if (client) {
+    await queryFn('SELECT pg_advisory_xact_lock($1)', [1132273485]);
+  }
   const res = await queryFn('SELECT COUNT(*) as count FROM donation_receipts WHERE financial_year = $1', [financialYear]);
   const sequence = parseInt(res.rows[0].count, 10) + 1;
   const paddedSeq = sequence.toString().padStart(5, '0');
@@ -75,16 +76,16 @@ async function generateReceiptNumber(client = null) {
 /**
  * Build 80G Receipt payload
  */
-function buildReceiptData({ receiptNumber, financialYear, donation, transactionId }) {
+function buildReceiptData({ receiptNumber, financialYear, donation, transactionId, trustProfile }) {
   return {
     receipt_number: receiptNumber,
     financial_year: financialYear,
     trust: {
-      name: config.trust.name,
-      pan: config.trust.pan,
-      address: config.trust.address,
-      registration_no: config.trust.registrationNo,
-      section_80g_no: config.trust.exemption80GNo
+      name: trustProfile.trust_name,
+      pan: trustProfile.pan,
+      address: trustProfile.address,
+      registration_no: trustProfile.registration_no,
+      section_80g_no: trustProfile.exemption_80g_no
     },
     donor: {
       name: donation.donor_name,

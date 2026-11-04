@@ -1,30 +1,31 @@
 import React, { useState, useEffect } from 'react';
-import { FileText, Download, ShieldCheck } from 'lucide-react';
+import { FileText, Download } from 'lucide-react';
 import { contentApi } from '../../api/contentApi';
 import { Spinner } from '../../components/common/Loader';
-import Button from '../../components/common/Button';
-import { useNotification } from '../../hooks/useNotification';
 
 export default function DocumentsPage() {
-  const { showSuccess } = useNotification();
   const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     async function loadDocs() {
       try {
         const res = await contentApi.getDocuments();
-        if (res.success) setDocuments(res.data || []);
+        if (res.success && Array.isArray(res.data)) {
+          setDocuments(res.data);
+        } else {
+          throw new Error(res.message || 'Documents could not be loaded.');
+        }
+      } catch (requestError) {
+        console.error('Failed to load trust documents:', requestError);
+        setError(requestError.message || 'Documents could not be loaded.');
       } finally {
         setLoading(false);
       }
     }
     loadDocs();
   }, []);
-
-  const handleDownload = (doc) => {
-    showSuccess(`Downloading "${doc.title}" (${doc.size})...`);
-  };
 
   return (
     <div>
@@ -37,18 +38,21 @@ export default function DocumentsPage() {
             Official Trust Documents & Audits
           </h1>
           <p style={{ fontSize: '1.2rem', color: 'var(--color-slate-300)', maxWidth: '720px' }}>
-            SECT maintains complete statutory compliance. Download audited financial reports, Income Tax Section 80G orders, and Trust deeds.
+            Browse and download the documents published by the trust.
           </p>
         </div>
       </section>
 
       <section className="section">
         <div className="container" style={{ maxWidth: '960px' }}>
+          <div className="documents-content">
           {loading ? (
             <Spinner text="Loading documents..." />
+          ) : error ? (
+            <p role="alert" className="form-error">{error}</p>
           ) : (
-            <div className="table-container" style={{ boxShadow: 'var(--shadow-md)' }}>
-              <table className="table">
+            <div className="table-container documents-table-container" style={{ boxShadow: 'var(--shadow-md)' }}>
+              <table className="table documents-table">
                 <thead>
                   <tr>
                     <th>Document Name</th>
@@ -79,14 +83,14 @@ export default function DocumentsPage() {
                         {doc.size}
                       </td>
                       <td style={{ textAlign: 'right' }}>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          icon={Download}
-                          onClick={() => handleDownload(doc)}
+                        {doc.fileAvailable && doc.fileUrl ? <a
+                          href={doc.fileUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="btn btn-outline btn-sm"
                         >
-                          Download
-                        </Button>
+                          <Download size={16} /> Download
+                        </a> : <span className="badge badge-neutral">File unavailable</span>}
                       </td>
                     </tr>
                   ))}
@@ -95,7 +99,31 @@ export default function DocumentsPage() {
             </div>
           )}
 
-          <div
+          {!loading && !error && <div className="documents-mobile-list">
+            {documents.map((doc) => (
+              <article key={doc.id} className="card document-card">
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.65rem' }}>
+                  <FileText size={20} color="var(--color-primary-600)" style={{ flexShrink: 0, marginTop: '0.1rem' }} />
+                  <h2 className="document-card-title">{doc.title}</h2>
+                </div>
+                <dl className="document-meta">
+                  <div><dt>Fiscal year</dt><dd>{doc.year}</dd></div>
+                  <div><dt>Format</dt><dd>{doc.type}</dd></div>
+                  <div><dt>Size</dt><dd>{doc.size}</dd></div>
+                </dl>
+                {doc.fileAvailable && doc.fileUrl ? <a
+                  href={doc.fileUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn btn-outline btn-sm"
+                >
+                  <Download size={16} /> Download
+                </a> : <span className="badge badge-neutral document-unavailable">File unavailable</span>}
+              </article>
+            ))}
+          </div>}
+
+          {documents.length > 0 && !error && <div
             style={{
               marginTop: '3rem',
               backgroundColor: 'var(--color-primary-50)',
@@ -107,15 +135,12 @@ export default function DocumentsPage() {
               gap: '1rem',
             }}
           >
-            <ShieldCheck size={26} color="var(--color-primary-700)" style={{ flexShrink: 0, marginTop: '0.2rem' }} />
             <div>
-              <h4 style={{ color: 'var(--color-primary-900)', marginBottom: '0.35rem' }}>
-                Statutory Reporting Commitment
-              </h4>
               <p style={{ fontSize: '0.92rem', color: 'var(--color-primary-800)', lineHeight: '1.6' }}>
-                All financial accounts of Saraswati Educational & Charitable Trust are audited annually by registered Chartered Accountants and submitted to the Income Tax Department of India. Patrons and institutional CSR contributors are entitled to inspect audited balance sheets at any time.
+                The documents listed here are published from the trust's records.
               </p>
             </div>
+          </div>}
           </div>
         </div>
       </section>

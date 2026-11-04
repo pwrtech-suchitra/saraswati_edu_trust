@@ -6,6 +6,7 @@ import {
   Users,
   CheckCircle2,
   Sun,
+  Presentation,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Button from '../../components/common/Button';
@@ -15,6 +16,7 @@ import { Spinner } from '../../components/common/Loader';
 export default function ActivitiesPage() {
   const [pillars, setPillars] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [activePillarId, setActivePillarId] = useState('all');
 
   useEffect(() => {
@@ -26,6 +28,7 @@ export default function ActivitiesPage() {
         }
       } catch (err) {
         console.error('Error loading activity pillars from database:', err);
+        setLoadError(true);
       } finally {
         setLoading(false);
       }
@@ -67,6 +70,7 @@ export default function ActivitiesPage() {
   const filteredPillars = activePillarId === 'all'
     ? pillars
     : pillars.filter(p => p.id === activePillarId);
+  const mandateCount = pillars.reduce((sum, pillar) => sum + (pillar.mandates?.length || 0), 0);
 
   return (
     <div>
@@ -80,7 +84,7 @@ export default function ActivitiesPage() {
             Areas of Activities & Core Mandates
           </h1>
           <p style={{ fontSize: '1.2rem', color: 'var(--color-slate-300)', maxWidth: '780px', margin: '0 auto' }}>
-            Organized into 4 core pillars comprising 27 concrete mandates directly from the Saraswati Educational &amp; Charitable Trust Profile.
+            Activity pillars and mandates maintained in the trust profile.
           </p>
         </div>
       </section>
@@ -90,6 +94,8 @@ export default function ActivitiesPage() {
         <div className="container">
           {loading ? (
             <Spinner text="Loading activity pillars from database..." />
+          ) : loadError ? (
+            <p role="alert">Activity information is currently unavailable. Please try again later.</p>
           ) : (
             <>
               {/* Category Filter Tabs */}
@@ -109,7 +115,7 @@ export default function ActivitiesPage() {
                     color: activePillarId === 'all' ? 'white' : 'var(--color-slate-700)',
                   }}
                 >
-                  All 4 Pillars (27 Mandates)
+                  All Pillars ({mandateCount} Mandates)
                 </button>
                 {pillars.map((p) => (
                   <button
@@ -231,15 +237,20 @@ export default function ActivitiesPage() {
                 }}
               >
                 <h3 style={{ color: 'white', fontSize: '1.8rem', marginBottom: '1rem' }}>
-                  Support Saraswati Educational &amp; Charitable Trust Initiatives
+                  Support the trust's initiatives
                 </h3>
                 <p style={{ color: 'var(--color-slate-300)', maxWidth: '650px', margin: '0 auto 2rem', fontSize: '1.05rem' }}>
-                  Every mandate is backed by verifiable on-ground grassroots implementation, official 80G tax receipts, and participatory community action.
+                  Explore the trust's current activity areas or contact the team to learn more about participation.
                 </p>
                 <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+                  <Link to="/projects/online-programs">
+                    <Button variant="outline-white" size="lg" icon={Presentation}>
+                      View online programs
+                    </Button>
+                  </Link>
                   <Link to="/donate">
                     <Button variant="amber" size="lg">
-                      Donate for the Mission (80G Eligible)
+                      Donate
                     </Button>
                   </Link>
                   <Link to="/contact">

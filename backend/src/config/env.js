@@ -5,42 +5,134 @@
 
 const dotenv = require('dotenv');
 const path = require('path');
+const crypto = require('crypto');
 
 dotenv.config({ path: path.join(__dirname, '../../.env') });
 
+const nodeEnv = process.env.NODE_ENV || 'development';
+const isProduction = nodeEnv === 'production';
+const trustProxyHops = process.env.TRUST_PROXY_HOPS === undefined
+  ? 0
+  : Number(process.env.TRUST_PROXY_HOPS);
+const developmentJwtSecret = crypto.randomBytes(32).toString('hex');
+const developmentRefreshSecret = crypto.randomBytes(32).toString('hex');
+
+function assertProductionConfiguration() {
+  const errors = [];
+  const rejectPlaceholder = (name, value, minLength) => {
+    if (!value || value.length < minLength || /change.?me|placeholder|your_|demo|example/i.test(value)) {
+      errors.push(`${name} must be a non-placeholder value of at least ${minLength} characters`);
+    }
+  };
+
+  if (!['development', 'test', 'production'].includes(nodeEnv)) {
+    errors.push('NODE_ENV must be development, test, or production');
+  }
+
+  if (
+    process.env.TRUST_PROXY_HOPS !== undefined &&
+    (
+      !/^\d+$/.test(process.env.TRUST_PROXY_HOPS) ||
+      trustProxyHops > 5 ||
+      (isProduction && trustProxyHops < 1)
+    )
+  ) {
+    errors.push(isProduction
+      ? 'TRUST_PROXY_HOPS must be an integer between 1 and 5 in production'
+      : 'TRUST_PROXY_HOPS must be an integer between 0 and 5');
+  }
+
+  if (!isProduction) {
+    if (errors.length > 0) {
+      throw new Error(`Invalid configuration:\n- ${errors.join('\n- ')}`);
+    }
+    return;
+  }
+
+  rejectPlaceholder('JWT_SECRET', process.env.JWT_SECRET, 32);
+  rejectPlaceholder('JWT_REFRESH_SECRET', process.env.JWT_REFRESH_SECRET, 32);
+  if (process.env.JWT_SECRET && process.env.JWT_SECRET === process.env.JWT_REFRESH_SECRET) {
+    errors.push('JWT_SECRET and JWT_REFRESH_SECRET must be different values');
+  }
+
+  if (!process.env.DATABASE_URL) {
+    errors.push('DATABASE_URL is required in production');
+  } else {
+    try {
+      const databaseUrl = new URL(process.env.DATABASE_URL);
+      if (!['postgres:', 'postgresql:'].includes(databaseUrl.protocol)) {
+        errors.push('DATABASE_URL must use the PostgreSQL protocol');
+      }
+    } catch {
+      errors.push('DATABASE_URL must be a valid PostgreSQL connection URL');
+    }
+  }
+
+  if (process.env.USE_EMBEDDED_DB === 'true') {
+    errors.push('USE_EMBEDDED_DB cannot be enabled in production');
+  }
+
+  const paymentSettings = [
+    process.env.PAYMENT_KEY_ID,
+    process.env.PAYMENT_KEY_SECRET,
+    process.env.PAYMENT_WEBHOOK_SECRET
+  ];
+  if (paymentSettings.some(Boolean)) {
+    if (
+      !process.env.PAYMENT_KEY_ID ||
+      !process.env.PAYMENT_KEY_ID.startsWith('rzp_live_') ||
+      /placeholder|example|your_/i.test(process.env.PAYMENT_KEY_ID)
+    ) {
+      errors.push('PAYMENT_KEY_ID must be a live Razorpay key when gateway settings are configured');
+    }
+    rejectPlaceholder('PAYMENT_KEY_SECRET', process.env.PAYMENT_KEY_SECRET, 16);
+    rejectPlaceholder('PAYMENT_WEBHOOK_SECRET', process.env.PAYMENT_WEBHOOK_SECRET, 32);
+  }
+
+  if (!process.env.FRONTEND_URL) {
+    errors.push('FRONTEND_URL is required in production');
+  } else {
+    try {
+      const frontendUrl = new URL(process.env.FRONTEND_URL);
+      if (frontendUrl.protocol !== 'https:') {
+        errors.push('FRONTEND_URL must use HTTPS in production');
+      }
+    } catch {
+      errors.push('FRONTEND_URL must be a valid URL');
+    }
+  }
+
+  if (errors.length > 0) {
+    throw new Error(`Invalid production configuration:\n- ${errors.join('\n- ')}`);
+  }
+}
+
+assertProductionConfiguration();
+
 const config = {
   port: parseInt(process.env.PORT || '5000', 10),
-  nodeEnv: process.env.NODE_ENV || 'development',
+  nodeEnv,
+  trustProxyHops,
+  databaseSslCa: process.env.DATABASE_SSL_CA || null,
   databaseUrl: process.env.DATABASE_URL || 'postgres://postgres:postgres@localhost:5432/sect_db',
   
   jwt: {
-    secret: process.env.JWT_SECRET || 'sect_default_dev_secret_key_1234567890',
+    secret: process.env.JWT_SECRET || developmentJwtSecret,
     expiresIn: process.env.JWT_EXPIRES_IN || '1h',
-    refreshSecret: process.env.JWT_REFRESH_SECRET || 'sect_default_refresh_secret_987654321',
+    refreshSecret: process.env.JWT_REFRESH_SECRET || developmentRefreshSecret,
     refreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d'
   },
 
   payment: {
-    keyId: process.env.PAYMENT_KEY_ID || 'rzp_test_demo',
-    keySecret: process.env.PAYMENT_KEY_SECRET || 'secret_demo',
-    webhookSecret: process.env.PAYMENT_WEBHOOK_SECRET || 'whsec_demo'
+    keyId: process.env.PAYMENT_KEY_ID || '',
+    keySecret: process.env.PAYMENT_KEY_SECRET || '',
+    webhookSecret: process.env.PAYMENT_WEBHOOK_SECRET || ''
   },
 
   frontendUrl: process.env.FRONTEND_URL || 'http://localhost:5173',
   uploadDir: process.env.UPLOAD_DIR || path.join(__dirname, '../../uploads'),
   maxFileSizeMb: parseInt(process.env.MAX_FILE_SIZE_MB || '10', 10),
 
-  trust: {
-    name: process.env.TRUST_NAME || 'Saraswati Educational & Charitable Trust',
-    shortName: 'SECT',
-    pan: process.env.TRUST_PAN || 'ABBTS7158P',
-    registrationNo: process.env.TRUST_REG_NO || 'TRUST/OD/2018/0091',
-    exemption80GNo: process.env.TRUST_80G_NO || 'AAETS9821BF20214',
-    address: 'K-8-82, Kalinga Nagar, Ghatikia, Bhubaneswar, Odisha-751029',
-    phone: '0674-2954256',
-    mobiles: ['9937159760', '9438747172'],
-    email: 'strust12@gmail.com'
-  }
 };
 
 module.exports = config;

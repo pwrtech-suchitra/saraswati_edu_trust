@@ -22,7 +22,7 @@ export default function AdminLayout() {
 
   const handleLogout = async () => {
     await logout();
-    navigate('/login');
+    navigate('/staff-login');
   };
 
   const navItems = [
@@ -185,7 +185,7 @@ export default function AdminLayout() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            padding: '0 1.75rem',
+            padding: '0 var(--page-gutter)',
             position: 'sticky',
             top: 0,
             zIndex: 90,
@@ -239,7 +239,7 @@ export default function AdminLayout() {
         </header>
 
         {/* Dynamic Outlet */}
-        <main style={{ padding: '2rem', flex: 1 }}>
+        <main style={{ padding: '2rem var(--page-gutter)', flex: 1 }}>
           <Outlet />
         </main>
       </div>

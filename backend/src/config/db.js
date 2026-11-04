@@ -15,11 +15,6 @@ const pgDataDir = path.resolve(
   process.env.PGLITE_DATA_DIR || path.join(__dirname, '../../../database/pgdata')
 );
 
-// Ensure pgdata dir exists
-if (!fs.existsSync(pgDataDir)) {
-  fs.mkdirSync(pgDataDir, { recursive: true });
-}
-
 let activeEngine = null; // 'pg' or 'pglite'
 let pgPool = null;
 let pgliteInstance = null;
@@ -36,7 +31,12 @@ async function getEngine() {
       try {
         pool = new Pool({
           connectionString: config.databaseUrl,
-          ssl: isProduction ? { rejectUnauthorized: false } : false,
+          ssl: isProduction
+            ? {
+                rejectUnauthorized: true,
+                ...(config.databaseSslCa ? { ca: config.databaseSslCa } : {})
+              }
+            : false,
           connectionTimeoutMillis: 1500,
         });
 
@@ -53,11 +53,23 @@ async function getEngine() {
         if (pool) {
           await pool.end().catch(() => {});
         }
-        console.log(`[DB] External PostgreSQL not reachable (${err.message}). Using persistent disk-backed PostgreSQL engine...`);
+        if (isProduction) {
+          throw new Error('PostgreSQL connection failed; refusing to use an embedded database in production.');
+        }
+
+        console.warn(`[DB] External PostgreSQL not reachable (${err.message}). Using persistent disk-backed PostgreSQL engine...`);
       }
     }
 
+    if (isProduction) {
+      throw new Error('Production requires an external PostgreSQL database.');
+    }
+
     // 2. Initialize persistent PGlite PostgreSQL database
+    if (!fs.existsSync(pgDataDir)) {
+      fs.mkdirSync(pgDataDir, { recursive: true });
+    }
+
     pgliteInstance = new PGlite(pgDataDir);
     activeEngine = 'pglite';
     console.log(`[DB] Persistent PostgreSQL engine initialized at: ${pgDataDir}`);

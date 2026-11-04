@@ -6,7 +6,7 @@ export default function NewsCard({ article, onReadMore }) {
   return (
     <div className="card" style={{ padding: '1.75rem', display: 'flex', flexDirection: 'column' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.85rem' }}>
-        <span className="badge badge-emerald">{article.category || 'Announcement'}</span>
+        {article.category && <span className="badge badge-emerald">{article.category}</span>}
         <span style={{ fontSize: '0.82rem', color: 'var(--color-slate-400)', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
           <Calendar size={14} /> {formatDate(article.date)}
         </span>

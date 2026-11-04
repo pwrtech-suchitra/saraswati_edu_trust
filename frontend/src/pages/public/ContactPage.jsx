@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { Mail, Phone, MapPin, Clock, Send, CheckCircle2, MessageCircle, Building2, ShieldCheck, ExternalLink } from 'lucide-react';
+import { Mail, Phone, MapPin, Send, CheckCircle2, MessageCircle, ExternalLink } from 'lucide-react';
 import { contactApi } from '../../api/contactApi';
 import { trustProfileApi } from '../../api/trustProfileApi';
+import { DONOR_CONTACT_PHONE } from '../../utils/trustContacts';
 import { isValidEmail, isValidIndianPhone } from '../../utils/validators';
 import { useNotification } from '../../hooks/useNotification';
 import Input from '../../components/common/Input';
 import Button from '../../components/common/Button';
+
 export default function ContactPage() {
   const { showSuccess, showError } = useNotification();
   const [trustProfile, setTrustProfile] = useState(null);
+  const [profileError, setProfileError] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -30,6 +33,7 @@ export default function ContactPage() {
         }
       } catch (err) {
         console.error('Error loading trust profile for contact page:', err);
+        setProfileError(true);
       }
     }
     loadProfile();
@@ -68,11 +72,19 @@ export default function ContactPage() {
   };
 
   const details = {
-    address: trustProfile?.address || 'K-8-82, Kalinga Nagar, Ghatikia, Bhubaneswar, Odisha-751029',
-    landline: trustProfile?.phone_landline || '0674-2954256',
-    mobiles: trustProfile?.phone_mobiles || ['9937159760', '9438747172'],
-    email: trustProfile?.email || 'strust12@gmail.com',
+    address: trustProfile?.address,
+    landline: trustProfile?.phone_landline,
+    mobiles: [...new Set([...(trustProfile?.phone_mobiles || []), DONOR_CONTACT_PHONE])],
+    email: trustProfile?.email,
   };
+  const socialLinks = [
+    trustProfile?.facebook_url && { label: 'Facebook', url: trustProfile.facebook_url },
+    trustProfile?.twitter_handle && {
+      label: 'X',
+      url: `https://x.com/${trustProfile.twitter_handle.replace(/^@/, '')}`
+    },
+    trustProfile?.linkedin_url && { label: 'LinkedIn', url: trustProfile.linkedin_url }
+  ].filter(Boolean);
 
   return (
     <div>
@@ -85,7 +97,7 @@ export default function ContactPage() {
             Contact & Secretariat Coordinates
           </h1>
           <p style={{ fontSize: '1.2rem', color: 'var(--color-slate-300)', maxWidth: '720px' }}>
-            Have questions about our renewable energy programs, rural schools, or wish to partner under Mission Sustainable India? Connect with our team.
+            Questions about our work, partnerships, or volunteering? Connect with our team.
           </p>
         </div>
       </section>
@@ -95,143 +107,60 @@ export default function ContactPage() {
           <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.25fr) minmax(0, 1.75fr)', gap: '3.5rem' }} className="contact-grid">
             {/* Left: Office & Statutory Coordinates */}
             <div>
+              {profileError && <p role="alert">Trust contact details are currently unavailable.</p>}
               <h3 style={{ fontSize: '1.4rem', marginBottom: '1.5rem', color: 'var(--color-slate-900)' }}>Trust Secretariat</h3>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', marginBottom: '2rem' }}>
-                {/* Registered Office */}
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem' }}>
-                  <div className="stat-icon-wrap stat-icon-emerald" style={{ width: '46px', height: '46px' }}>
-                    <MapPin size={22} />
-                  </div>
+                {details.address && <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem' }}>
+                  <MapPin size={22} />
+                  <div><h4>Registered Office</h4><p>{details.address}</p></div>
+                </div>}
+                {details.email && <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem' }}>
+                  <Mail size={22} />
+                  <div><h4>Official Email</h4><a href={`mailto:${details.email}`}>{details.email}</a></div>
+                </div>}
+                {(details.landline || details.mobiles.length > 0) && <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem' }}>
+                  <Phone size={22} />
                   <div>
-                    <h4 style={{ fontSize: '1rem', marginBottom: '0.2rem' }}>Registered Corporate Office</h4>
-                    <p style={{ fontSize: '0.92rem', color: 'var(--color-slate-600)', margin: 0, lineHeight: '1.5' }}>
-                      {details.address}
-                    </p>
+                    <h4>Phone &amp; Mobile Numbers</h4>
+                    {details.landline && <p>Landline: <a href={`tel:${details.landline}`}>{details.landline}</a></p>}
+                    {details.mobiles.map((phone) => <p key={phone}><a href={`tel:${phone}`}>{phone}</a></p>)}
                   </div>
-                </div>
-
-                {/* Email */}
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem' }}>
-                  <div className="stat-icon-wrap stat-icon-amber" style={{ width: '46px', height: '46px' }}>
-                    <Mail size={22} />
-                  </div>
+                </div>}
+                {trustProfile?.whatsapp_numbers?.length > 0 && <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem' }}>
+                  <MessageCircle size={22} />
                   <div>
-                    <h4 style={{ fontSize: '1rem', marginBottom: '0.2rem' }}>Official Email</h4>
-                    <p style={{ fontSize: '0.92rem', color: 'var(--color-slate-600)', margin: 0 }}>
-                      <a href={`mailto:${details.email}`} style={{ color: 'var(--color-primary-700)', fontWeight: 600 }}>
-                        {details.email}
-                      </a>
-                    </p>
+                    <h4>WhatsApp</h4>
+                    {trustProfile.whatsapp_numbers.map((phone) => {
+                      const digits = phone.replace(/\D/g, '');
+                      const number = digits.startsWith('91') ? digits : `91${digits}`;
+                      return <a key={phone} href={`https://wa.me/${number}`} target="_blank" rel="noopener noreferrer" style={{ display: 'block' }}>Chat {phone}<ExternalLink size={12} /></a>;
+                    })}
                   </div>
-                </div>
-
-                {/* Landline & Mobiles */}
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem' }}>
-                  <div className="stat-icon-wrap stat-icon-teal" style={{ width: '46px', height: '46px' }}>
-                    <Phone size={22} />
-                  </div>
-                  <div>
-                    <h4 style={{ fontSize: '1rem', marginBottom: '0.2rem' }}>Phone & Mobile Numbers</h4>
-                    <p style={{ fontSize: '0.92rem', color: 'var(--color-slate-600)', margin: 0, lineHeight: '1.5' }}>
-                      Landline: <strong>{details.landline}</strong><br />
-                      Mobile: {details.mobiles.join(', ')}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Direct WhatsApp Links */}
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem' }}>
-                  <div style={{ width: '46px', height: '46px', borderRadius: '12px', background: '#dcfce7', color: '#16a34a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <MessageCircle size={24} />
-                  </div>
-                  <div>
-                    <h4 style={{ fontSize: '1rem', marginBottom: '0.2rem' }}>WhatsApp Direct Chat</h4>
-                    <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginTop: '0.25rem' }}>
-                      {details.mobiles.map((mob, idx) => (
-                        <a
-                          key={idx}
-                          href={`https://wa.me/91${mob}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          style={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '0.35rem',
-                            backgroundColor: '#22c55e',
-                            color: 'white',
-                            padding: '0.35rem 0.75rem',
-                            borderRadius: '6px',
-                            fontSize: '0.82rem',
-                            fontWeight: 600,
-                            textDecoration: 'none',
-                          }}
-                        >
-                          Chat +91 {mob}
-                          <ExternalLink size={12} />
-                        </a>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Secretariat Hours */}
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem' }}>
-                  <div className="stat-icon-wrap stat-icon-slate" style={{ width: '46px', height: '46px' }}>
-                    <Clock size={22} />
-                  </div>
-                  <div>
-                    <h4 style={{ fontSize: '1rem', marginBottom: '0.2rem' }}>Secretariat Working Hours</h4>
-                    <p style={{ fontSize: '0.92rem', color: 'var(--color-slate-600)', margin: 0 }}>
-                      Monday – Saturday: 9:30 AM – 5:30 PM (IST)
-                    </p>
-                  </div>
-                </div>
+                </div>}
               </div>
 
-              {/* Statutory Credentials Box */}
-              <div style={{ backgroundColor: 'var(--color-slate-50)', padding: '1.25rem', borderRadius: '12px', border: '1px solid var(--color-slate-200)', marginBottom: '1.5rem' }}>
+              {trustProfile && <div style={{ backgroundColor: 'var(--color-slate-50)', padding: '1.25rem', borderRadius: '12px', border: '1px solid var(--color-slate-200)', marginBottom: '1.5rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
-                  <ShieldCheck size={20} color="var(--color-primary-700)" />
-                  <h4 style={{ fontSize: '0.95rem', margin: 0, color: 'var(--color-slate-900)' }}>Official Statutory Credentials</h4>
+                  <h4 style={{ fontSize: '0.95rem', margin: 0, color: 'var(--color-slate-900)' }}>Official Trust Details</h4>
                 </div>
                 <div style={{ fontSize: '0.85rem', color: 'var(--color-slate-600)', lineHeight: '1.6' }}>
-                  <div><strong>Trust Legal Name:</strong> Saraswati Educational & Charitable Trust</div>
-                  <div><strong>Tax Exemption:</strong> Section 80G Certified Non-Profit</div>
-                  <div><strong>Official Enquiries:</strong> Assistance for grants & CSR available via secretariat email</div>
+                  {trustProfile.trust_name && <div><strong>Trust Legal Name:</strong> {trustProfile.trust_name}</div>}
+                  {trustProfile.pan && <div><strong>PAN:</strong> {trustProfile.pan}</div>}
                 </div>
               </div>
+              }
 
-              {/* Social Channels (Page 5 of PDF) */}
-              <div>
+              {socialLinks.length > 0 && <div>
                 <h4 style={{ fontSize: '0.95rem', marginBottom: '0.6rem', color: 'var(--color-slate-800)' }}>Stay Connected on Social Platforms</h4>
                 <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                  <a
-                    href="https://facebook.com"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{ padding: '0.35rem 0.75rem', borderRadius: '6px', border: '1px solid var(--color-slate-300)', fontSize: '0.82rem', fontWeight: 600, color: 'var(--color-slate-700)' }}
-                  >
-                    Facebook: Saraswati Educational Charitable Trust
-                  </a>
-                  <a
-                    href="https://twitter.com"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{ padding: '0.35rem 0.75rem', borderRadius: '6px', border: '1px solid var(--color-slate-300)', fontSize: '0.82rem', fontWeight: 600, color: 'var(--color-slate-700)' }}
-                  >
-                    X/Twitter: @saraswati_trust
-                  </a>
-                  <a
-                    href="https://linkedin.com"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{ padding: '0.35rem 0.75rem', borderRadius: '6px', border: '1px solid var(--color-slate-300)', fontSize: '0.82rem', fontWeight: 600, color: 'var(--color-slate-700)' }}
-                  >
-                    LinkedIn: Saraswati Educational Charitable Trust
-                  </a>
+                  {socialLinks.map(({ label, url }) => (
+                    <a key={label} href={url} target="_blank" rel="noopener noreferrer" style={{ padding: '0.35rem 0.75rem', borderRadius: '6px', border: '1px solid var(--color-slate-300)', fontSize: '0.82rem', fontWeight: 600, color: 'var(--color-slate-700)' }}>
+                      {label}
+                    </a>
+                  ))}
                 </div>
-              </div>
+              </div>}
             </div>
 
             {/* Right: Contact Form */}
@@ -255,7 +184,7 @@ export default function ContactPage() {
                   </div>
                   <h3 style={{ marginBottom: '0.5rem' }}>Message Submitted Successfully</h3>
                   <p style={{ color: 'var(--color-slate-600)', maxWidth: '420px', margin: '0 auto 2rem' }}>
-                    Thank you for reaching out to Saraswati Educational &amp; Charitable Trust. Your message has been saved to our database and our secretariat will respond promptly.
+                    Thank you for reaching out{trustProfile?.trust_name ? ` to ${trustProfile.trust_name}` : ''}. Your message has been saved to our database.
                   </p>
                   <Button variant="primary" onClick={() => setSubmitted(false)}>
                     Send Another Message

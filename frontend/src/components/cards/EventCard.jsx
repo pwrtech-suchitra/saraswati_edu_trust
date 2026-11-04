@@ -4,12 +4,15 @@ import { formatDate } from '../../utils/formatters';
 import Button from '../common/Button';
 
 export default function EventCard({ event, onRegister }) {
+  const hasCapacity = event.seatsAvailable !== undefined && event.seatsAvailable !== null;
+  const isFull = hasCapacity && event.seatsAvailable <= 0;
+
   return (
     <div className="card" style={{ padding: '1.75rem', display: 'flex', flexDirection: 'column' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
         <span className="badge badge-warning">Upcoming Event</span>
         <span style={{ fontSize: '0.8rem', color: 'var(--color-primary-700)', fontWeight: 600 }}>
-          {event.seatsAvailable ? `${event.seatsAvailable} seats left` : 'Open Entry'}
+          {isFull ? 'Full' : hasCapacity ? `${event.seatsAvailable} seats left` : 'Open Entry'}
         </span>
       </div>
 
@@ -22,10 +25,10 @@ export default function EventCard({ event, onRegister }) {
           <Calendar size={16} color="var(--color-primary-600)" />
           <span>{formatDate(event.date)}</span>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+        {event.time && <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
           <Clock size={16} color="var(--color-primary-600)" />
           <span>{event.time}</span>
-        </div>
+        </div>}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
           <MapPin size={16} color="var(--color-primary-600)" />
           <span>{event.location}</span>
@@ -36,8 +39,8 @@ export default function EventCard({ event, onRegister }) {
         {event.description}
       </p>
 
-      <Button variant="primary" size="sm" onClick={() => onRegister?.(event)}>
-        Register Free
+      <Button variant="primary" size="sm" disabled={isFull} onClick={() => onRegister?.(event)}>
+        {isFull ? 'Event Full' : 'Register Free'}
       </Button>
     </div>
   );
