@@ -80,15 +80,21 @@ test('production gateway errors do not persist a fake payment order', async (t) 
   const originalFetch = global.fetch;
   const originalQuery = db.query;
   const originalNodeEnv = config.nodeEnv;
+  const originalKeyId = config.payment.keyId;
+  const originalKeySecret = config.payment.keySecret;
   let databaseWrites = 0;
 
   t.after(() => {
     global.fetch = originalFetch;
     db.query = originalQuery;
     config.nodeEnv = originalNodeEnv;
+    config.payment.keyId = originalKeyId;
+    config.payment.keySecret = originalKeySecret;
   });
 
   config.nodeEnv = 'production';
+  config.payment.keyId = 'rzp_live_unit_test';
+  config.payment.keySecret = 'unit-test-secret';
   global.fetch = async () => ({
     ok: false,
     json: async () => ({ error: { description: 'private gateway response' } })
